@@ -31,7 +31,8 @@ const Header = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/dashboard/cases?search=${encodeURIComponent(searchQuery.trim())}`);
+      navigate(`/dashboard/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
     }
   };
 
