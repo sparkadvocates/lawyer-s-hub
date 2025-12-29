@@ -55,6 +55,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { useCases, CaseData, CreateCaseData } from "@/hooks/useCases";
 import { useClients } from "@/hooks/useClients";
+import CaseDetailView from "@/components/cases/CaseDetailView";
 
 const caseTypes = [
   "Civil Litigation",
@@ -605,81 +606,13 @@ const Cases = () => {
 
       {/* View Dialog */}
       <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-        <DialogContent className="bg-card border-border max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="bg-card border-border max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-xl">
               {selectedCase?.case_number} - {selectedCase?.title}
             </DialogTitle>
           </DialogHeader>
-          {selectedCase && (
-            <div className="space-y-6 mt-4">
-              <div className="flex gap-2">
-                <Badge variant="outline" className={statusConfig[selectedCase.status]?.className}>
-                  {statusConfig[selectedCase.status]?.label}
-                </Badge>
-                <Badge variant="outline" className={priorityConfig[selectedCase.priority]?.className}>
-                  {priorityConfig[selectedCase.priority]?.label}
-                </Badge>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Client</p>
-                  <p className="font-medium">{selectedCase.client?.name || "-"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Case Type</p>
-                  <p className="font-medium">{selectedCase.case_type || "-"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Court</p>
-                  <p className="font-medium">{selectedCase.court_name || "-"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Judge</p>
-                  <p className="font-medium">{selectedCase.judge_name || "-"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Opposing Party</p>
-                  <p className="font-medium">{selectedCase.opposing_party || "-"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Opposing Counsel</p>
-                  <p className="font-medium">{selectedCase.opposing_counsel || "-"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Filing Date</p>
-                  <p className="font-medium">
-                    {selectedCase.filing_date
-                      ? format(new Date(selectedCase.filing_date), "MMM d, yyyy")
-                      : "-"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Next Hearing</p>
-                  <p className="font-medium">
-                    {selectedCase.next_hearing_date
-                      ? format(new Date(selectedCase.next_hearing_date), "MMM d, yyyy")
-                      : "-"}
-                  </p>
-                </div>
-              </div>
-
-              {selectedCase.description && (
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Description</p>
-                  <p className="text-foreground">{selectedCase.description}</p>
-                </div>
-              )}
-
-              {selectedCase.notes && (
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Notes</p>
-                  <p className="text-foreground">{selectedCase.notes}</p>
-                </div>
-              )}
-            </div>
-          )}
+          {selectedCase && <CaseDetailView caseData={selectedCase} />}
         </DialogContent>
       </Dialog>
 
