@@ -47,6 +47,220 @@ export type Database = {
         }
         Relationships: []
       }
+      case_documents: {
+        Row: {
+          case_id: string | null
+          category: string | null
+          client_id: string | null
+          created_at: string
+          description: string | null
+          file_path: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          case_id?: string | null
+          category?: string | null
+          client_id?: string | null
+          created_at?: string
+          description?: string | null
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          case_id?: string | null
+          category?: string | null
+          client_id?: string | null
+          created_at?: string
+          description?: string | null
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_documents_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "case_documents_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      case_timeline: {
+        Row: {
+          case_id: string
+          created_at: string
+          description: string | null
+          event_date: string
+          event_type: string
+          id: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          case_id: string
+          created_at?: string
+          description?: string | null
+          event_date?: string
+          event_type: string
+          id?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          case_id?: string
+          created_at?: string
+          description?: string | null
+          event_date?: string
+          event_type?: string
+          id?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_timeline_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cases: {
+        Row: {
+          case_number: string
+          case_type: string | null
+          client_id: string | null
+          closed_date: string | null
+          court_name: string | null
+          created_at: string
+          description: string | null
+          filing_date: string | null
+          id: string
+          judge_name: string | null
+          next_hearing_date: string | null
+          notes: string | null
+          opposing_counsel: string | null
+          opposing_party: string | null
+          priority: Database["public"]["Enums"]["case_priority"]
+          status: Database["public"]["Enums"]["case_status"]
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          case_number: string
+          case_type?: string | null
+          client_id?: string | null
+          closed_date?: string | null
+          court_name?: string | null
+          created_at?: string
+          description?: string | null
+          filing_date?: string | null
+          id?: string
+          judge_name?: string | null
+          next_hearing_date?: string | null
+          notes?: string | null
+          opposing_counsel?: string | null
+          opposing_party?: string | null
+          priority?: Database["public"]["Enums"]["case_priority"]
+          status?: Database["public"]["Enums"]["case_status"]
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          case_number?: string
+          case_type?: string | null
+          client_id?: string | null
+          closed_date?: string | null
+          court_name?: string | null
+          created_at?: string
+          description?: string | null
+          filing_date?: string | null
+          id?: string
+          judge_name?: string | null
+          next_hearing_date?: string | null
+          notes?: string | null
+          opposing_counsel?: string | null
+          opposing_party?: string | null
+          priority?: Database["public"]["Enums"]["case_priority"]
+          status?: Database["public"]["Enums"]["case_status"]
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cases_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          address: string | null
+          company: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payment_history: {
         Row: {
           amount: number
@@ -268,6 +482,14 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      case_priority: "low" | "medium" | "high" | "urgent"
+      case_status:
+        | "open"
+        | "in_progress"
+        | "pending"
+        | "closed"
+        | "won"
+        | "lost"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -396,6 +618,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      case_priority: ["low", "medium", "high", "urgent"],
+      case_status: ["open", "in_progress", "pending", "closed", "won", "lost"],
     },
   },
 } as const
