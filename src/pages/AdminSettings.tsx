@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -24,17 +26,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Shield, ShieldCheck, User, Users, Settings, RefreshCw } from "lucide-react";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Shield, ShieldCheck, User, Users, Settings, RefreshCw, Plus, Pencil, Key } from "lucide-react";
 import { RoleBadge } from "@/components/RoleBadge";
 import { AppRole } from "@/hooks/useAuth";
 
@@ -44,6 +44,8 @@ interface UserWithRole {
   created_at: string;
   last_sign_in_at: string | null;
   role: AppRole;
+  username: string;
+  display_name: string;
 }
 
 const AdminSettings = () => {
@@ -52,6 +54,23 @@ const AdminSettings = () => {
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
+
+  // Create user form
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [newUsername, setNewUsername] = useState("");
+  const [newDisplayName, setNewDisplayName] = useState("");
+  const [newRole, setNewRole] = useState<AppRole>("user");
+  const [creating, setCreating] = useState(false);
+
+  // Edit user form
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<UserWithRole | null>(null);
+  const [editUsername, setEditUsername] = useState("");
+  const [editDisplayName, setEditDisplayName] = useState("");
+  const [editPassword, setEditPassword] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const fetchUsers = async () => {
     try {
@@ -69,9 +88,10 @@ const AdminSettings = () => {
       }
 
       setUsers(response.data.users || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching users:", error);
-      toast.error(error.message || "Failed to fetch users");
+      const message = error instanceof Error ? error.message : "Failed to fetch users";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -95,11 +115,100 @@ const AdminSettings = () => {
 
       toast.success(`Role updated to ${newRole}`);
       await fetchUsers();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error updating role:", error);
-      toast.error(error.message || "Failed to update role");
+      const message = error instanceof Error ? error.message : "Failed to update role";
+      toast.error(message);
     } finally {
       setUpdating(null);
+    }
+  };
+
+  const createUser = async () => {
+    if (!newEmail || !newPassword) {
+      toast.error("Email and password are required");
+      return;
+    }
+
+    try {
+      setCreating(true);
+      const { data: sessionData } = await supabase.auth.getSession();
+
+      const response = await supabase.functions.invoke("admin-create-user", {
+        headers: {
+          Authorization: `Bearer ${sessionData.session?.access_token}`,
+        },
+        body: {
+          email: newEmail,
+          password: newPassword,
+          username: newUsername || newEmail,
+          displayName: newDisplayName || newEmail.split("@")[0],
+          role: newRole,
+        },
+      });
+
+      if (response.error || response.data?.error) {
+        throw new Error(response.error?.message || response.data?.error || "Failed to create user");
+      }
+
+      toast.success("User created successfully");
+      setCreateDialogOpen(false);
+      setNewEmail("");
+      setNewPassword("");
+      setNewUsername("");
+      setNewDisplayName("");
+      setNewRole("user");
+      await fetchUsers();
+    } catch (error: unknown) {
+      console.error("Error creating user:", error);
+      const message = error instanceof Error ? error.message : "Failed to create user";
+      toast.error(message);
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const openEditDialog = (u: UserWithRole) => {
+    setEditingUser(u);
+    setEditUsername(u.username);
+    setEditDisplayName(u.display_name);
+    setEditPassword("");
+    setEditDialogOpen(true);
+  };
+
+  const saveUserChanges = async () => {
+    if (!editingUser) return;
+
+    try {
+      setSaving(true);
+      const { data: sessionData } = await supabase.auth.getSession();
+
+      const response = await supabase.functions.invoke("admin-update-user", {
+        headers: {
+          Authorization: `Bearer ${sessionData.session?.access_token}`,
+        },
+        body: {
+          targetUserId: editingUser.id,
+          username: editUsername,
+          displayName: editDisplayName,
+          newPassword: editPassword || undefined,
+        },
+      });
+
+      if (response.error || response.data?.error) {
+        throw new Error(response.error?.message || response.data?.error || "Failed to update user");
+      }
+
+      toast.success("User updated successfully");
+      setEditDialogOpen(false);
+      setEditingUser(null);
+      await fetchUsers();
+    } catch (error: unknown) {
+      console.error("Error updating user:", error);
+      const message = error instanceof Error ? error.message : "Failed to update user";
+      toast.error(message);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -139,20 +248,7 @@ const AdminSettings = () => {
       year: "numeric",
       month: "short",
       day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
     });
-  };
-
-  const getRoleIcon = (role: AppRole) => {
-    switch (role) {
-      case "admin":
-        return <ShieldCheck className="w-4 h-4" />;
-      case "moderator":
-        return <Shield className="w-4 h-4" />;
-      default:
-        return <User className="w-4 h-4" />;
-    }
   };
 
   return (
@@ -172,10 +268,89 @@ const AdminSettings = () => {
                 Manage users, roles, and system settings
               </p>
             </div>
-            <Button onClick={fetchUsers} variant="outline" size="sm">
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Refresh
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={fetchUsers} variant="outline" size="sm">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Refresh
+              </Button>
+              <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add User
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Create New User</DialogTitle>
+                    <DialogDescription>
+                      Add a new user to the system with specified credentials and role.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email *</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="user@example.com"
+                        value={newEmail}
+                        onChange={(e) => setNewEmail(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="password">Password *</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="Min 6 characters"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="username">Username</Label>
+                      <Input
+                        id="username"
+                        placeholder="username"
+                        value={newUsername}
+                        onChange={(e) => setNewUsername(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="displayName">Display Name</Label>
+                      <Input
+                        id="displayName"
+                        placeholder="John Doe"
+                        value={newDisplayName}
+                        onChange={(e) => setNewDisplayName(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="role">Role</Label>
+                      <Select value={newRole} onValueChange={(v: AppRole) => setNewRole(v)}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="user">User</SelectItem>
+                          <SelectItem value="moderator">Moderator</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={createUser} disabled={creating}>
+                      {creating ? "Creating..." : "Create User"}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
 
           {/* Stats Cards */}
@@ -233,17 +408,17 @@ const AdminSettings = () => {
                 User Management
               </CardTitle>
               <CardDescription>
-                View and manage user roles. Admins can promote or demote users.
+                View, create, and manage user accounts and roles.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Username</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Role</TableHead>
                     <TableHead>Created</TableHead>
-                    <TableHead>Last Sign In</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -251,6 +426,12 @@ const AdminSettings = () => {
                   {users.map((u) => (
                     <TableRow key={u.id}>
                       <TableCell className="font-medium">
+                        <div className="flex flex-col">
+                          <span>{u.username}</span>
+                          <span className="text-xs text-muted-foreground">{u.display_name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
                         <div className="flex items-center gap-2">
                           {u.email}
                           {u.id === user?.id && (
@@ -261,52 +442,48 @@ const AdminSettings = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <RoleBadge role={u.role} />
+                        <Select
+                          value={u.role}
+                          onValueChange={(value: AppRole) => updateUserRole(u.id, value)}
+                          disabled={updating === u.id || u.id === user?.id}
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="user">
+                              <div className="flex items-center gap-2">
+                                <User className="w-4 h-4" />
+                                User
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="moderator">
+                              <div className="flex items-center gap-2">
+                                <Shield className="w-4 h-4" />
+                                Moderator
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="admin">
+                              <div className="flex items-center gap-2">
+                                <ShieldCheck className="w-4 h-4" />
+                                Admin
+                              </div>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                       </TableCell>
                       <TableCell className="text-muted-foreground text-sm">
                         {formatDate(u.created_at)}
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {formatDate(u.last_sign_in_at)}
-                      </TableCell>
                       <TableCell className="text-right">
-                        {u.id === user?.id ? (
-                          <span className="text-sm text-muted-foreground">
-                            Cannot modify own role
-                          </span>
-                        ) : (
-                          <Select
-                            value={u.role}
-                            onValueChange={(value: AppRole) =>
-                              updateUserRole(u.id, value)
-                            }
-                            disabled={updating === u.id}
-                          >
-                            <SelectTrigger className="w-32">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="user">
-                                <div className="flex items-center gap-2">
-                                  <User className="w-4 h-4" />
-                                  User
-                                </div>
-                              </SelectItem>
-                              <SelectItem value="moderator">
-                                <div className="flex items-center gap-2">
-                                  <Shield className="w-4 h-4" />
-                                  Moderator
-                                </div>
-                              </SelectItem>
-                              <SelectItem value="admin">
-                                <div className="flex items-center gap-2">
-                                  <ShieldCheck className="w-4 h-4" />
-                                  Admin
-                                </div>
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openEditDialog(u)}
+                        >
+                          <Pencil className="w-4 h-4 mr-1" />
+                          Edit
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -323,6 +500,62 @@ const AdminSettings = () => {
           </Card>
         </div>
       </main>
+
+      {/* Edit User Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit User</DialogTitle>
+            <DialogDescription>
+              Update user details and password for {editingUser?.email}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="editUsername">Username</Label>
+              <Input
+                id="editUsername"
+                value={editUsername}
+                onChange={(e) => setEditUsername(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="editDisplayName">Display Name</Label>
+              <Input
+                id="editDisplayName"
+                value={editDisplayName}
+                onChange={(e) => setEditDisplayName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="editPassword">
+                <div className="flex items-center gap-2">
+                  <Key className="w-4 h-4" />
+                  New Password
+                </div>
+              </Label>
+              <Input
+                id="editPassword"
+                type="password"
+                placeholder="Leave blank to keep current password"
+                value={editPassword}
+                onChange={(e) => setEditPassword(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Min 6 characters. Leave blank to keep the current password.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={saveUserChanges} disabled={saving}>
+              {saving ? "Saving..." : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
