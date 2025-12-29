@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, isToday, parseISO } from "date-fns";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Gavel, Users, Clock, Briefcase, Bell, MapPin, X } from "lucide-react";
 import Sidebar from "@/components/dashboard/Sidebar";
@@ -12,6 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useCases } from "@/hooks/useCases";
 
 interface CalendarEvent {
   id: string;
@@ -26,79 +29,6 @@ interface CalendarEvent {
   reminder?: boolean;
 }
 
-// Mock data for cases
-const mockCases = [
-  { id: "1", name: "Smith vs. Johnson Corp" },
-  { id: "2", name: "Estate of Williams" },
-  { id: "3", name: "Thompson Criminal Defense" },
-  { id: "4", name: "Garcia Immigration Appeal" },
-  { id: "5", name: "Chen Contract Dispute" },
-];
-
-// Initial events
-const initialEvents: CalendarEvent[] = [
-  {
-    id: "1",
-    title: "Court Hearing - Smith vs. Johnson",
-    date: "2024-12-30",
-    time: "09:00",
-    type: "court",
-    caseId: "1",
-    caseName: "Smith vs. Johnson Corp",
-    location: "District Court, Room 204",
-    reminder: true,
-  },
-  {
-    id: "2",
-    title: "Client Meeting - Williams Estate",
-    date: "2024-12-31",
-    time: "14:00",
-    type: "meeting",
-    caseId: "2",
-    caseName: "Estate of Williams",
-    location: "Office",
-  },
-  {
-    id: "3",
-    title: "Filing Deadline - Thompson Case",
-    date: "2025-01-02",
-    time: "17:00",
-    type: "deadline",
-    caseId: "3",
-    caseName: "Thompson Criminal Defense",
-    reminder: true,
-  },
-  {
-    id: "4",
-    title: "Initial Consultation - New Client",
-    date: "2025-01-03",
-    time: "10:30",
-    type: "consultation",
-    location: "Office",
-  },
-  {
-    id: "5",
-    title: "Court Appearance - Garcia Appeal",
-    date: "2025-01-06",
-    time: "11:00",
-    type: "court",
-    caseId: "4",
-    caseName: "Garcia Immigration Appeal",
-    location: "Federal Court, Room 101",
-    reminder: true,
-  },
-  {
-    id: "6",
-    title: "Document Review Reminder",
-    date: "2025-01-08",
-    time: "09:00",
-    type: "reminder",
-    caseId: "5",
-    caseName: "Chen Contract Dispute",
-    description: "Review all contract documents before mediation",
-  },
-];
-
 const eventTypeConfig = {
   court: { icon: Gavel, color: "bg-destructive text-destructive-foreground", label: "Court Date" },
   meeting: { icon: Users, color: "bg-info text-foreground", label: "Meeting" },
@@ -108,12 +38,34 @@ const eventTypeConfig = {
 };
 
 const Calendar = () => {
+  const { user } = useAuth();
+  const { cases: dbCases } = useCases();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [events, setEvents] = useState<CalendarEvent[]>(initialEvents);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   
+  // Load events from database (hearing dates from cases)
+  useEffect(() => {
+    if (dbCases && dbCases.length > 0) {
+      const caseEvents: CalendarEvent[] = dbCases
+        .filter(c => c.next_hearing_date)
+        .map(c => ({
+          id: `case-${c.id}`,
+          title: `হেয়ারিং - ${c.title}`,
+          date: c.next_hearing_date!,
+          time: "10:00",
+          type: "court" as const,
+          caseId: c.id,
+          caseName: c.title,
+          location: c.court_name || undefined,
+          reminder: true,
+        }));
+      setEvents(caseEvents);
+    }
+  }, [dbCases]);
+
   // Form state
   const [newEvent, setNewEvent] = useState({
     title: "",
@@ -149,7 +101,7 @@ const Calendar = () => {
       return;
     }
 
-    const selectedCase = mockCases.find((c) => c.id === newEvent.caseId);
+    const selectedCase = dbCases?.find((c) => c.id === newEvent.caseId);
     
     const event: CalendarEvent = {
       id: Date.now().toString(),
@@ -158,13 +110,13 @@ const Calendar = () => {
       time: newEvent.time,
       type: newEvent.type,
       caseId: newEvent.caseId || undefined,
-      caseName: selectedCase?.name,
+      caseName: selectedCase?.title,
       location: newEvent.location || undefined,
       description: newEvent.description || undefined,
       reminder: newEvent.reminder,
     };
 
-    setEvents([...events, event]);
+    setEvents(prev => [...prev, event]);
     setIsAddEventOpen(false);
     setNewEvent({
       title: "",
@@ -285,9 +237,9 @@ const Calendar = () => {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="">No case linked</SelectItem>
-                          {mockCases.map((caseItem) => (
+                          {dbCases?.map((caseItem) => (
                             <SelectItem key={caseItem.id} value={caseItem.id}>
-                              {caseItem.name}
+                              {caseItem.title}
                             </SelectItem>
                           ))}
                         </SelectContent>
