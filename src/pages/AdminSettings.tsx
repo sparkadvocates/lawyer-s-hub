@@ -112,17 +112,24 @@ const AdminSettings = () => {
   const updateUserRole = async (targetUserId: string, newRole: AppRole) => {
     try {
       setUpdating(targetUserId);
-      const { data: sessionData } = await supabase.auth.getSession();
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+
+      if (sessionError || !token) {
+        toast.error("Session expired. Please login again.");
+        navigate("/admin/login");
+        return;
+      }
 
       const response = await supabase.functions.invoke("admin-update-role", {
         headers: {
-          Authorization: `Bearer ${sessionData.session?.access_token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: { targetUserId, newRole },
       });
 
-      if (response.error) {
-        throw new Error(response.error.message || "Failed to update role");
+      if (response.error || response.data?.error) {
+        throw new Error(response.error?.message || response.data?.error || "Failed to update role");
       }
 
       toast.success(`Role updated to ${newRole}`);
@@ -144,11 +151,18 @@ const AdminSettings = () => {
 
     try {
       setCreating(true);
-      const { data: sessionData } = await supabase.auth.getSession();
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+
+      if (sessionError || !token) {
+        toast.error("Session expired. Please login again.");
+        navigate("/admin/login");
+        return;
+      }
 
       const response = await supabase.functions.invoke("admin-create-user", {
         headers: {
-          Authorization: `Bearer ${sessionData.session?.access_token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: {
           email: newEmail,
@@ -193,11 +207,18 @@ const AdminSettings = () => {
 
     try {
       setSaving(true);
-      const { data: sessionData } = await supabase.auth.getSession();
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+
+      if (sessionError || !token) {
+        toast.error("Session expired. Please login again.");
+        navigate("/admin/login");
+        return;
+      }
 
       const response = await supabase.functions.invoke("admin-update-user", {
         headers: {
-          Authorization: `Bearer ${sessionData.session?.access_token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: {
           targetUserId: editingUser.id,

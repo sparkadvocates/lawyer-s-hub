@@ -1,4 +1,22 @@
 project_id = "sqlhyikzerzvgyxareys"
 
+# Public seeding endpoint (no auth at edge layer, but function still enforces logic)
 [functions.seed-admin]
+verify_jwt = false
+
+# Workaround for "Invalid JWT" edge-layer verification:
+# These functions validate the JWT themselves via auth.getUser() and enforce admin role checks.
+[functions.admin-get-users]
+verify_jwt = false
+
+[functions.admin-create-user]
+verify_jwt = false
+
+[functions.admin-update-user]
+verify_jwt = false
+
+[functions.admin-update-role]
+verify_jwt = false
+
+[functions.bootstrap-admin]
 verify_jwt = false
