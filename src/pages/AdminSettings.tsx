@@ -34,7 +34,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Shield, ShieldCheck, User, Users, Settings, RefreshCw, Plus, Pencil, Key } from "lucide-react";
+import { Shield, ShieldCheck, User, Users, Settings, RefreshCw, Plus, Pencil, Key, Mail, Save } from "lucide-react";
 import { RoleBadge } from "@/components/RoleBadge";
 import { AppRole } from "@/hooks/useAuth";
 
@@ -71,6 +71,13 @@ const AdminSettings = () => {
   const [editDisplayName, setEditDisplayName] = useState("");
   const [editPassword, setEditPassword] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Email settings
+  const [resendApiKey, setResendApiKey] = useState("");
+  const [fromEmail, setFromEmail] = useState("");
+  const [fromName, setFromName] = useState("");
+  const [emailSettingsLoading, setEmailSettingsLoading] = useState(true);
+  const [savingEmail, setSavingEmail] = useState(false);
 
   const fetchUsers = async () => {
     try {
@@ -245,6 +252,74 @@ const AdminSettings = () => {
     }
   };
 
+  const fetchEmailSettings = async () => {
+    try {
+      setEmailSettingsLoading(true);
+      const { data, error } = await supabase
+        .from('email_settings')
+        .select('*')
+        .limit(1)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching email settings:', error);
+        return;
+      }
+
+      if (data) {
+        setResendApiKey(data.resend_api_key || '');
+        setFromEmail(data.from_email || '');
+        setFromName(data.from_name || '');
+      }
+    } catch (error) {
+      console.error('Error fetching email settings:', error);
+    } finally {
+      setEmailSettingsLoading(false);
+    }
+  };
+
+  const saveEmailSettings = async () => {
+    try {
+      setSavingEmail(true);
+      
+      const { data: existing } = await supabase
+        .from('email_settings')
+        .select('id')
+        .limit(1)
+        .single();
+
+      if (existing) {
+        const { error } = await supabase
+          .from('email_settings')
+          .update({
+            resend_api_key: resendApiKey || null,
+            from_email: fromEmail,
+            from_name: fromName,
+          })
+          .eq('id', existing.id);
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('email_settings')
+          .insert({
+            resend_api_key: resendApiKey || null,
+            from_email: fromEmail,
+            from_name: fromName,
+          });
+
+        if (error) throw error;
+      }
+
+      toast.success('ইমেইল সেটিংস সংরক্ষিত হয়েছে');
+    } catch (error) {
+      console.error('Error saving email settings:', error);
+      toast.error('সেটিংস সংরক্ষণে সমস্যা হয়েছে');
+    } finally {
+      setSavingEmail(false);
+    }
+  };
+
   useEffect(() => {
     if (!authLoading && !isAdmin) {
       toast.error("Access denied: Admin privileges required");
@@ -254,6 +329,7 @@ const AdminSettings = () => {
 
     if (!authLoading && isAdmin) {
       fetchUsers();
+      fetchEmailSettings();
     }
   }, [authLoading, isAdmin, navigate]);
 
@@ -432,6 +508,67 @@ const AdminSettings = () => {
               </CardContent>
             </Card>
           </div>
+
+          {/* Email Settings Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mail className="w-5 h-5" />
+                ইমেইল সেটিংস
+              </CardTitle>
+              <CardDescription>
+                রিনিউ নোটিফিকেশন ইমেইল পাঠানোর জন্য Resend API কনফিগার করুন
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {emailSettingsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="resendApiKey">Resend API Key</Label>
+                    <Input
+                      id="resendApiKey"
+                      type="password"
+                      placeholder="re_xxxxxxxxxx"
+                      value={resendApiKey}
+                      onChange={(e) => setResendApiKey(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Resend থেকে API Key সংগ্রহ করুন: <a href="https://resend.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">resend.com</a>
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="fromEmail">প্রেরকের ইমেইল</Label>
+                      <Input
+                        id="fromEmail"
+                        type="email"
+                        placeholder="noreply@yourdomain.com"
+                        value={fromEmail}
+                        onChange={(e) => setFromEmail(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="fromName">প্রেরকের নাম</Label>
+                      <Input
+                        id="fromName"
+                        placeholder="Legal Case Manager"
+                        value={fromName}
+                        onChange={(e) => setFromName(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <Button onClick={saveEmailSettings} disabled={savingEmail}>
+                    <Save className="w-4 h-4 mr-2" />
+                    {savingEmail ? "সংরক্ষণ হচ্ছে..." : "সেটিংস সংরক্ষণ করুন"}
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Users Table */}
           <Card>

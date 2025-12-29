@@ -18,20 +18,28 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const resendApiKey = Deno.env.get('RESEND_API_KEY');
-    
-    if (!resendApiKey) {
-      console.log('RESEND_API_KEY not configured, skipping email');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Get email settings from database
+    const { data: emailSettings, error: settingsError } = await supabase
+      .from('email_settings')
+      .select('*')
+      .limit(1)
+      .single();
+
+    if (settingsError || !emailSettings?.resend_api_key) {
+      console.log('Email settings not configured, skipping email');
       return new Response(
-        JSON.stringify({ success: true, message: 'Email skipped - no API key' }),
+        JSON.stringify({ success: true, message: 'Email skipped - not configured' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const resend = new Resend(resendApiKey);
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const resend = new Resend(emailSettings.resend_api_key);
+    const fromEmail = emailSettings.from_email || 'noreply@example.com';
+    const fromName = emailSettings.from_name || 'System';
 
     const { user_id, plan_name, end_date }: RenewalEmailRequest = await req.json();
 
@@ -50,7 +58,7 @@ Deno.serve(async (req: Request) => {
     const formattedDate = new Date(end_date).toLocaleDateString('bn-BD');
 
     const emailResponse = await resend.emails.send({
-      from: 'Legal Case Manager <onboarding@resend.dev>',
+      from: `${fromName} <${fromEmail}>`,
       to: [email],
       subject: 'আপনার সাবস্ক্রিপশন রিনিউ করুন',
       html: `
