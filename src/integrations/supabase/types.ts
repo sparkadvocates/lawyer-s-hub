@@ -222,6 +222,75 @@ export type Database = {
           },
         ]
       }
+      checks: {
+        Row: {
+          bank_name: string
+          case_filed_date: string | null
+          case_id: string | null
+          check_amount: number | null
+          check_date: string
+          check_number: string
+          client_id: string | null
+          created_at: string
+          dishonor_date: string | null
+          id: string
+          legal_notice_date: string | null
+          notes: string | null
+          notice_status: Database["public"]["Enums"]["notice_status"] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bank_name: string
+          case_filed_date?: string | null
+          case_id?: string | null
+          check_amount?: number | null
+          check_date: string
+          check_number: string
+          client_id?: string | null
+          created_at?: string
+          dishonor_date?: string | null
+          id?: string
+          legal_notice_date?: string | null
+          notes?: string | null
+          notice_status?: Database["public"]["Enums"]["notice_status"] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bank_name?: string
+          case_filed_date?: string | null
+          case_id?: string | null
+          check_amount?: number | null
+          check_date?: string
+          check_number?: string
+          client_id?: string | null
+          created_at?: string
+          dishonor_date?: string | null
+          id?: string
+          legal_notice_date?: string | null
+          notes?: string | null
+          notice_status?: Database["public"]["Enums"]["notice_status"] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checks_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checks_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           address: string | null
@@ -565,6 +634,12 @@ export type Database = {
         | "closed"
         | "won"
         | "lost"
+      notice_status:
+        | "pending"
+        | "ad_received"
+        | "recipient_not_found"
+        | "returned_unaccepted"
+        | "delivered"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -695,6 +770,13 @@ export const Constants = {
       app_role: ["admin", "moderator", "user"],
       case_priority: ["low", "medium", "high", "urgent"],
       case_status: ["open", "in_progress", "pending", "closed", "won", "lost"],
+      notice_status: [
+        "pending",
+        "ad_received",
+        "recipient_not_found",
+        "returned_unaccepted",
+        "delivered",
+      ],
     },
   },
 } as const
