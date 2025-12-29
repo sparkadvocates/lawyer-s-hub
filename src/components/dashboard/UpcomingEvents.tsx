@@ -1,4 +1,5 @@
 import { Calendar, Clock, MapPin, Video, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -45,6 +46,8 @@ const typeStyles: Record<string, { bg: string; icon: typeof Calendar }> = {
 };
 
 const UpcomingEvents = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="glass-card">
       <div className="p-6 border-b border-border flex items-center justify-between">
@@ -54,7 +57,7 @@ const UpcomingEvents = () => {
           </div>
           <h3 className="font-display text-lg font-semibold">Upcoming Events</h3>
         </div>
-        <Button variant="ghost" size="sm" className="text-primary">
+        <Button variant="ghost" size="sm" className="text-primary" onClick={() => navigate("/dashboard/calendar")}>
           View Calendar <ArrowRight className="w-4 h-4 ml-1" />
         </Button>
       </div>
@@ -68,6 +71,7 @@ const UpcomingEvents = () => {
             <div
               key={event.id}
               className={`p-4 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors cursor-pointer animate-fade-in stagger-${index + 1}`}
+              onClick={() => navigate("/dashboard/court-dates")}
             >
               <div className="flex items-start gap-4">
                 <div className={cn("p-2 rounded-lg flex-shrink-0", style.bg)}>

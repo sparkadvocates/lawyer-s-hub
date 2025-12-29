@@ -1,4 +1,5 @@
 import { Briefcase, ArrowRight, MoreHorizontal } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -60,6 +61,8 @@ const priorityColors: Record<string, string> = {
 };
 
 const RecentCases = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="glass-card">
       <div className="p-6 border-b border-border flex items-center justify-between">
@@ -69,7 +72,7 @@ const RecentCases = () => {
           </div>
           <h3 className="font-display text-lg font-semibold">Recent Cases</h3>
         </div>
-        <Button variant="ghost" size="sm" className="text-primary">
+        <Button variant="ghost" size="sm" className="text-primary" onClick={() => navigate("/dashboard/cases")}>
           View All <ArrowRight className="w-4 h-4 ml-1" />
         </Button>
       </div>
@@ -110,8 +113,8 @@ const RecentCases = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem>View Details</DropdownMenuItem>
-                  <DropdownMenuItem>Edit Case</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/dashboard/cases")}>View Details</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/dashboard/cases")}>Edit Case</DropdownMenuItem>
                   <DropdownMenuItem>Add Note</DropdownMenuItem>
                   <DropdownMenuItem>Archive</DropdownMenuItem>
                 </DropdownMenuContent>
