@@ -15,7 +15,7 @@ type AuthMode = "login" | "signup" | "reset";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { signIn, signUp, resetPassword, user, loading } = useAuth();
+  const { signIn, signUp, resetPassword, user, loading, isAdmin } = useAuth();
   
   const [mode, setMode] = useState<AuthMode>("login");
   const [email, setEmail] = useState("");
@@ -25,12 +25,16 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
 
-  // Redirect if already logged in
+  // Redirect based on role
   useEffect(() => {
     if (user && !loading) {
-      navigate("/dashboard");
+      if (isAdmin) {
+        navigate("/dashboard");
+      } else {
+        navigate("/user/dashboard");
+      }
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, isAdmin, navigate]);
 
   const validateForm = () => {
     const newErrors: typeof errors = {};
@@ -78,8 +82,7 @@ const Login = () => {
             toast.error(error.message);
           }
         } else {
-          toast.success("Welcome back, Counselor!");
-          navigate("/dashboard");
+          toast.success("Welcome back!");
         }
       } else if (mode === "signup") {
         const { error } = await signUp(email, password);
@@ -90,8 +93,7 @@ const Login = () => {
             toast.error(error.message);
           }
         } else {
-          toast.success("Account created successfully! Welcome to LexProSuite.");
-          navigate("/dashboard");
+          toast.success("Account created successfully!");
         }
       } else if (mode === "reset") {
         const { error } = await resetPassword(email);
@@ -102,7 +104,7 @@ const Login = () => {
           setMode("login");
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
@@ -187,12 +189,12 @@ const Login = () => {
               </button>
             )}
             <h2 className="font-display text-3xl font-bold text-foreground mb-2">
-              {mode === "login" && "Welcome Back"}
+              {mode === "login" && "User Login"}
               {mode === "signup" && "Create Account"}
               {mode === "reset" && "Reset Password"}
             </h2>
             <p className="text-muted-foreground">
-              {mode === "login" && "Sign in to access your legal dashboard"}
+              {mode === "login" && "Sign in to access your dashboard"}
               {mode === "signup" && "Start managing your legal practice today"}
               {mode === "reset" && "Enter your email to receive a reset link"}
             </p>
@@ -208,7 +210,7 @@ const Login = () => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="attorney@lawfirm.com"
+                  placeholder="user@lawfirm.com"
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
@@ -331,17 +333,25 @@ const Login = () => {
             </Button>
           </form>
 
-          <div className="mt-8 text-center">
+          <div className="mt-8 text-center space-y-3">
             {mode === "login" ? (
-              <p className="text-muted-foreground text-sm">
-                Don't have an account?{" "}
-                <button
-                  onClick={() => setMode("signup")}
-                  className="text-primary hover:underline font-medium"
-                >
-                  Create one now
-                </button>
-              </p>
+              <>
+                <p className="text-muted-foreground text-sm">
+                  Don't have an account?{" "}
+                  <button
+                    onClick={() => setMode("signup")}
+                    className="text-primary hover:underline font-medium"
+                  >
+                    Create one now
+                  </button>
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  Are you an admin?{" "}
+                  <Link to="/admin/login" className="text-destructive hover:underline font-medium">
+                    Admin Login
+                  </Link>
+                </p>
+              </>
             ) : mode === "signup" ? (
               <p className="text-muted-foreground text-sm">
                 Already have an account?{" "}

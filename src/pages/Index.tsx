@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Scale, ArrowRight, Shield, Clock, FileText, Users } from "lucide-react";
+import { Scale, ArrowRight, Shield, Clock, FileText, Users, ShieldCheck, User } from "lucide-react";
 
 const features = [
   {
@@ -51,10 +51,12 @@ const Index = () => {
 
           <div className="flex items-center gap-4">
             <Button variant="ghost" onClick={() => navigate("/login")}>
-              Sign In
+              <User className="w-4 h-4 mr-2" />
+              User Login
             </Button>
-            <Button variant="gold" onClick={() => navigate("/login")}>
-              Get Started
+            <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => navigate("/admin/login")}>
+              <ShieldCheck className="w-4 h-4 mr-2" />
+              Admin Login
             </Button>
           </div>
         </nav>
