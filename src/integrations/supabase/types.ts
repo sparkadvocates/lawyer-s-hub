@@ -267,7 +267,11 @@ export type Database = {
           from_email: string
           from_name: string | null
           id: string
-          resend_api_key: string | null
+          smtp_host: string | null
+          smtp_password: string | null
+          smtp_port: number | null
+          smtp_secure: boolean | null
+          smtp_user: string | null
           updated_at: string
         }
         Insert: {
@@ -275,7 +279,11 @@ export type Database = {
           from_email?: string
           from_name?: string | null
           id?: string
-          resend_api_key?: string | null
+          smtp_host?: string | null
+          smtp_password?: string | null
+          smtp_port?: number | null
+          smtp_secure?: boolean | null
+          smtp_user?: string | null
           updated_at?: string
         }
         Update: {
@@ -283,7 +291,11 @@ export type Database = {
           from_email?: string
           from_name?: string | null
           id?: string
-          resend_api_key?: string | null
+          smtp_host?: string | null
+          smtp_password?: string | null
+          smtp_port?: number | null
+          smtp_secure?: boolean | null
+          smtp_user?: string | null
           updated_at?: string
         }
         Relationships: []

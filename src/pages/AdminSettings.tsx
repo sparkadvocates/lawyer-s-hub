@@ -72,8 +72,11 @@ const AdminSettings = () => {
   const [editPassword, setEditPassword] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // Email settings
-  const [resendApiKey, setResendApiKey] = useState("");
+  // Email settings (Gmail SMTP)
+  const [smtpHost, setSmtpHost] = useState("smtp.gmail.com");
+  const [smtpPort, setSmtpPort] = useState(587);
+  const [smtpUser, setSmtpUser] = useState("");
+  const [smtpPassword, setSmtpPassword] = useState("");
   const [fromEmail, setFromEmail] = useState("");
   const [fromName, setFromName] = useState("");
   const [emailSettingsLoading, setEmailSettingsLoading] = useState(true);
@@ -267,7 +270,10 @@ const AdminSettings = () => {
       }
 
       if (data) {
-        setResendApiKey(data.resend_api_key || '');
+        setSmtpHost(data.smtp_host || 'smtp.gmail.com');
+        setSmtpPort(data.smtp_port || 587);
+        setSmtpUser(data.smtp_user || '');
+        setSmtpPassword(data.smtp_password || '');
         setFromEmail(data.from_email || '');
         setFromName(data.from_name || '');
       }
@@ -292,7 +298,10 @@ const AdminSettings = () => {
         const { error } = await supabase
           .from('email_settings')
           .update({
-            resend_api_key: resendApiKey || null,
+            smtp_host: smtpHost,
+            smtp_port: smtpPort,
+            smtp_user: smtpUser || null,
+            smtp_password: smtpPassword || null,
             from_email: fromEmail,
             from_name: fromName,
           })
@@ -303,7 +312,10 @@ const AdminSettings = () => {
         const { error } = await supabase
           .from('email_settings')
           .insert({
-            resend_api_key: resendApiKey || null,
+            smtp_host: smtpHost,
+            smtp_port: smtpPort,
+            smtp_user: smtpUser || null,
+            smtp_password: smtpPassword || null,
             from_email: fromEmail,
             from_name: fromName,
           });
@@ -517,7 +529,7 @@ const AdminSettings = () => {
                 ইমেইল সেটিংস
               </CardTitle>
               <CardDescription>
-                রিনিউ নোটিফিকেশন ইমেইল পাঠানোর জন্য Resend API কনফিগার করুন
+                Gmail SMTP ব্যবহার করে রিনিউ নোটিফিকেশন ইমেইল পাঠান (বিনামূল্যে)
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -527,26 +539,67 @@ const AdminSettings = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="resendApiKey">Resend API Key</Label>
-                    <Input
-                      id="resendApiKey"
-                      type="password"
-                      placeholder="re_xxxxxxxxxx"
-                      value={resendApiKey}
-                      onChange={(e) => setResendApiKey(e.target.value)}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Resend থেকে API Key সংগ্রহ করুন: <a href="https://resend.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">resend.com</a>
-                    </p>
+                  <div className="p-4 bg-muted rounded-lg">
+                    <h4 className="font-medium mb-2">Gmail App Password সেটআপ</h4>
+                    <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+                      <li>Gmail এ 2-Step Verification চালু করুন</li>
+                      <li><a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google App Passwords</a> এ যান</li>
+                      <li>নতুন App Password তৈরি করুন এবং নিচে ব্যবহার করুন</li>
+                    </ol>
                   </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="smtpHost">SMTP Host</Label>
+                      <Input
+                        id="smtpHost"
+                        placeholder="smtp.gmail.com"
+                        value={smtpHost}
+                        onChange={(e) => setSmtpHost(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="smtpPort">SMTP Port</Label>
+                      <Input
+                        id="smtpPort"
+                        type="number"
+                        placeholder="587"
+                        value={smtpPort}
+                        onChange={(e) => setSmtpPort(parseInt(e.target.value) || 587)}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="smtpUser">Gmail Address</Label>
+                      <Input
+                        id="smtpUser"
+                        type="email"
+                        placeholder="your-email@gmail.com"
+                        value={smtpUser}
+                        onChange={(e) => setSmtpUser(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="smtpPassword">App Password</Label>
+                      <Input
+                        id="smtpPassword"
+                        type="password"
+                        placeholder="xxxx xxxx xxxx xxxx"
+                        value={smtpPassword}
+                        onChange={(e) => setSmtpPassword(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="fromEmail">প্রেরকের ইমেইল</Label>
                       <Input
                         id="fromEmail"
                         type="email"
-                        placeholder="noreply@yourdomain.com"
+                        placeholder="your-email@gmail.com"
                         value={fromEmail}
                         onChange={(e) => setFromEmail(e.target.value)}
                       />
@@ -561,6 +614,7 @@ const AdminSettings = () => {
                       />
                     </div>
                   </div>
+                  
                   <Button onClick={saveEmailSettings} disabled={savingEmail}>
                     <Save className="w-4 h-4 mr-2" />
                     {savingEmail ? "সংরক্ষণ হচ্ছে..." : "সেটিংস সংরক্ষণ করুন"}
