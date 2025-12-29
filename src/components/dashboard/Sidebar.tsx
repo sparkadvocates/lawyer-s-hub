@@ -19,6 +19,7 @@ import {
   BarChart3,
   CreditCard,
   FileCheck,
+  Database,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ const menuItems = [
   { icon: DollarSign, label: "Billing", path: "/dashboard/billing" },
   { icon: Gavel, label: "Court Dates", path: "/dashboard/court" },
   { icon: MessageSquare, label: "Messages", path: "/dashboard/messages" },
+  { icon: Database, label: "Backup", path: "/dashboard/backup" },
 ];
 
 const Sidebar = () => {
