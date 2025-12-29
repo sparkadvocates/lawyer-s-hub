@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Briefcase,
@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
@@ -38,6 +40,14 @@ const bottomItems = [
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
+
+  const handleLogout = async () => {
+    await signOut();
+    toast.success("Signed out successfully");
+    navigate("/login");
+  };
 
   return (
     <aside
@@ -104,6 +114,7 @@ const Sidebar = () => {
         })}
 
         <button
+          onClick={handleLogout}
           className={cn(
             "nav-item w-full text-destructive hover:text-destructive hover:bg-destructive/10",
             collapsed && "justify-center px-2"
