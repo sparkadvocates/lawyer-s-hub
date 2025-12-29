@@ -108,6 +108,8 @@ const AdminPackages = () => {
   const [selectedUserId, setSelectedUserId] = useState("");
   const [selectedPlanId, setSelectedPlanId] = useState("");
   const [selectedCycle, setSelectedCycle] = useState("monthly");
+  const [customDuration, setCustomDuration] = useState("");
+  const [durationUnit, setDurationUnit] = useState<"days" | "months" | "years">("months");
   const [subAmount, setSubAmount] = useState("");
   const [subPaymentMethod, setSubPaymentMethod] = useState("");
   const [subPaymentRef, setSubPaymentRef] = useState("");
@@ -288,8 +290,18 @@ const AdminPackages = () => {
         (selectedCycle === "monthly" ? selectedPlan?.price_monthly : selectedPlan?.price_yearly) ||
         0;
 
+      // Calculate end date based on custom duration or billing cycle
       const endDate = new Date();
-      if (selectedCycle === "monthly") {
+      if (customDuration && parseInt(customDuration) > 0) {
+        const duration = parseInt(customDuration);
+        if (durationUnit === "days") {
+          endDate.setDate(endDate.getDate() + duration);
+        } else if (durationUnit === "months") {
+          endDate.setMonth(endDate.getMonth() + duration);
+        } else if (durationUnit === "years") {
+          endDate.setFullYear(endDate.getFullYear() + duration);
+        }
+      } else if (selectedCycle === "monthly") {
         endDate.setMonth(endDate.getMonth() + 1);
       } else {
         endDate.setFullYear(endDate.getFullYear() + 1);
@@ -305,6 +317,7 @@ const AdminPackages = () => {
         payment_reference: subPaymentRef || null,
         notes: subNotes || null,
         end_date: endDate.toISOString(),
+        renewal_reminder_sent: false,
       });
 
       if (subError) throw subError;
@@ -316,7 +329,7 @@ const AdminPackages = () => {
         payment_method: subPaymentMethod || null,
         payment_reference: subPaymentRef || null,
         status: "completed",
-        notes: `${selectedPlan?.name} - ${selectedCycle === "monthly" ? "মাসিক" : "বাৎসরিক"}`,
+        notes: `${selectedPlan?.name} - ${customDuration ? `${customDuration} ${durationUnit}` : (selectedCycle === "monthly" ? "মাসিক" : "বাৎসরিক")}`,
       });
 
       if (payError) console.error("Payment recording error:", payError);
@@ -325,6 +338,8 @@ const AdminPackages = () => {
       setSubDialogOpen(false);
       setSelectedUserId("");
       setSelectedPlanId("");
+      setCustomDuration("");
+      setDurationUnit("months");
       setSubAmount("");
       setSubPaymentMethod("");
       setSubPaymentRef("");
@@ -619,6 +634,29 @@ const AdminPackages = () => {
                             <SelectItem value="yearly">বাৎসরিক</SelectItem>
                           </SelectContent>
                         </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>কাস্টম মেয়াদ (ঐচ্ছিক)</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            type="number"
+                            value={customDuration}
+                            onChange={(e) => setCustomDuration(e.target.value)}
+                            placeholder="যেমন: 6"
+                            className="flex-1"
+                          />
+                          <Select value={durationUnit} onValueChange={(v) => setDurationUnit(v as "days" | "months" | "years")}>
+                            <SelectTrigger className="w-24">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="days">দিন</SelectItem>
+                              <SelectItem value="months">মাস</SelectItem>
+                              <SelectItem value="years">বছর</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <p className="text-xs text-muted-foreground">খালি রাখলে বিলিং সাইকেল অনুযায়ী হবে</p>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">

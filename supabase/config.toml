@@ -20,3 +20,11 @@ verify_jwt = false
 
 [functions.bootstrap-admin]
 verify_jwt = false
+
+# Subscription cron job - called by scheduled task
+[functions.subscription-cron]
+verify_jwt = false
+
+# Renewal email sender
+[functions.send-renewal-email]
+verify_jwt = false
