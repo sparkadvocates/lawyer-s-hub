@@ -20,6 +20,7 @@ import Checks from "./pages/Checks";
 import Billing from "./pages/Billing";
 import Messages from "./pages/Messages";
 import Backup from "./pages/Backup";
+import Search from "./pages/Search";
 import AdminSettings from "./pages/AdminSettings";
 import AdminReports from "./pages/AdminReports";
 import AdminPackages from "./pages/AdminPackages";
@@ -131,6 +132,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Backup />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/search"
+              element={
+                <ProtectedRoute>
+                  <Search />
                 </ProtectedRoute>
               }
             />
