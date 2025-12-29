@@ -19,8 +19,11 @@ import {
   ExternalLink,
   Key,
   FolderOpen,
-  Timer,
   Save,
+  Zap,
+  Calendar,
+  RefreshCw,
+  Activity,
 } from "lucide-react";
 import Sidebar from "@/components/dashboard/Sidebar";
 import Header from "@/components/dashboard/Header";
@@ -28,13 +31,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import {
   Card,
@@ -82,15 +78,19 @@ const Backup = () => {
   const [driveClientId, setDriveClientId] = useState("");
   const [driveApiKey, setDriveApiKey] = useState("");
   const [driveFolderId, setDriveFolderId] = useState("");
-  const [autoBackup, setAutoBackup] = useState(false);
-  const [autoBackupInterval, setAutoBackupInterval] = useState<"daily" | "weekly" | "monthly">("daily");
+  const [scheduledBackupEnabled, setScheduledBackupEnabled] = useState(false);
+  const [scheduledBackupTime, setScheduledBackupTime] = useState("02:00");
+  const [realtimeBackupEnabled, setRealtimeBackupEnabled] = useState(true);
+  const [maxBackups, setMaxBackups] = useState(20);
 
   const {
     isExporting,
     isImporting,
     isUploadingToDrive,
+    isAutoBackupActive,
     backups,
     googleDriveConfig,
+    lastBackupTime,
     loadLocalBackups,
     exportBackup,
     importBackup,
@@ -109,8 +109,10 @@ const Backup = () => {
       setDriveClientId(googleDriveConfig.clientId || "");
       setDriveApiKey(googleDriveConfig.apiKey || "");
       setDriveFolderId(googleDriveConfig.folderId || "");
-      setAutoBackup(googleDriveConfig.autoBackup || false);
-      setAutoBackupInterval(googleDriveConfig.autoBackupInterval || "daily");
+      setScheduledBackupEnabled(googleDriveConfig.scheduledBackupEnabled || false);
+      setScheduledBackupTime(googleDriveConfig.scheduledBackupTime || "02:00");
+      setRealtimeBackupEnabled(googleDriveConfig.realtimeBackupEnabled ?? true);
+      setMaxBackups(googleDriveConfig.maxBackups || 20);
     }
   }, [googleDriveConfig]);
 
@@ -139,8 +141,11 @@ const Backup = () => {
       clientId: driveClientId,
       apiKey: driveApiKey,
       folderId: driveFolderId,
-      autoBackup,
-      autoBackupInterval,
+      autoBackupEnabled: scheduledBackupEnabled || realtimeBackupEnabled,
+      scheduledBackupEnabled,
+      scheduledBackupTime,
+      realtimeBackupEnabled,
+      maxBackups,
     });
   };
 
@@ -157,6 +162,8 @@ const Backup = () => {
     { name: "activity_logs", label: "অ্যাক্টিভিটি লগ", icon: "📊" },
   ];
 
+  const driveBackupCount = backups.filter(b => b.type === "google_drive").length;
+
   return (
     <div className="min-h-screen bg-background flex">
       <Sidebar />
@@ -165,13 +172,70 @@ const Backup = () => {
         <main className="flex-1 p-6 overflow-auto">
           <div className="max-w-6xl mx-auto space-y-6">
             {/* Page Header */}
-            <div>
-              <h1 className="text-3xl font-display font-bold text-foreground">
-                ডাটাবেস ব্যাকআপ ও রিস্টোর
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                সম্পূর্ণ ডাটাবেস ব্যাকআপ, রিস্টোর এবং Google Drive সিঙ্ক
-              </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-display font-bold text-foreground">
+                  ডাটাবেস ব্যাকআপ ও রিস্টোর
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                  সম্পূর্ণ ডাটাবেস ব্যাকআপ, রিস্টোর এবং Google Drive অটো-সিঙ্ক
+                </p>
+              </div>
+              {isAutoBackupActive && (
+                <Badge variant="outline" className="gap-2 animate-pulse bg-primary/10">
+                  <RefreshCw className="w-3 h-3 animate-spin" />
+                  অটো-ব্যাকআপ চলছে...
+                </Badge>
+              )}
+            </div>
+
+            {/* Status Cards */}
+            <div className="grid md:grid-cols-3 gap-4">
+              <Card className="glass-card">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-full bg-primary/10">
+                      <Clock className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">শেষ ব্যাকআপ</p>
+                      <p className="font-semibold">
+                        {lastBackupTime
+                          ? format(new Date(lastBackupTime), "dd MMM, hh:mm a", { locale: bn })
+                          : "কখনো হয়নি"}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="glass-card">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-full bg-info/10">
+                      <Cloud className="w-6 h-6 text-info" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Drive ব্যাকআপ</p>
+                      <p className="font-semibold">{driveBackupCount} / {maxBackups}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="glass-card">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-4">
+                    <div className={`p-3 rounded-full ${realtimeBackupEnabled ? "bg-success/10" : "bg-muted"}`}>
+                      <Activity className={`w-6 h-6 ${realtimeBackupEnabled ? "text-success" : "text-muted-foreground"}`} />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">রিয়েলটাইম ব্যাকআপ</p>
+                      <p className="font-semibold">{realtimeBackupEnabled ? "সক্রিয়" : "নিষ্ক্রিয়"}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
             {/* Database Tables Info */}
@@ -208,7 +272,7 @@ const Backup = () => {
                 </TabsTrigger>
                 <TabsTrigger value="gdrive" className="gap-2">
                   <Cloud className="w-4 h-4" />
-                  Google Drive
+                  Google Drive অটো-ব্যাকআপ
                 </TabsTrigger>
               </TabsList>
 
@@ -324,11 +388,87 @@ const Backup = () => {
 
               {/* Google Drive Tab */}
               <TabsContent value="gdrive" className="space-y-6">
+                {/* Auto Backup Settings */}
+                <Card className="glass-card border-primary/30">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Zap className="w-5 h-5 text-primary" />
+                      অটো-ব্যাকআপ সেটিংস
+                    </CardTitle>
+                    <CardDescription>
+                      স্বয়ংক্রিয় ব্যাকআপের জন্য নিয়ম নির্ধারণ করুন
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Realtime Backup */}
+                    <div className="flex items-center justify-between p-4 rounded-lg bg-success/5 border border-success/20">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Activity className="w-4 h-4 text-success" />
+                          <Label className="font-semibold">রিয়েলটাইম ব্যাকআপ</Label>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          যেকোনো নতুন মামলা, চেক বা ডাটা এন্ট্রি হলে সাথে সাথে ব্যাকআপ হবে
+                        </p>
+                      </div>
+                      <Switch 
+                        checked={realtimeBackupEnabled} 
+                        onCheckedChange={setRealtimeBackupEnabled} 
+                      />
+                    </div>
+
+                    {/* Scheduled Daily Backup */}
+                    <div className="flex items-center justify-between p-4 rounded-lg bg-info/5 border border-info/20">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-info" />
+                          <Label className="font-semibold">দৈনিক নির্ধারিত ব্যাকআপ</Label>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          প্রতিদিন নির্দিষ্ট সময়ে স্বয়ংক্রিয়ভাবে ব্যাকআপ হবে
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Input
+                          type="time"
+                          value={scheduledBackupTime}
+                          onChange={(e) => setScheduledBackupTime(e.target.value)}
+                          className="w-32"
+                          disabled={!scheduledBackupEnabled}
+                        />
+                        <Switch 
+                          checked={scheduledBackupEnabled} 
+                          onCheckedChange={setScheduledBackupEnabled} 
+                        />
+                      </div>
+                    </div>
+
+                    {/* Max Backups */}
+                    <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
+                      <div className="space-y-1">
+                        <Label className="font-semibold">সর্বোচ্চ ব্যাকআপ সংখ্যা</Label>
+                        <p className="text-xs text-muted-foreground">
+                          এই সংখ্যার বেশি হলে পুরাতন ব্যাকআপ স্বয়ংক্রিয়ভাবে মুছে যাবে
+                        </p>
+                      </div>
+                      <Input
+                        type="number"
+                        min={5}
+                        max={50}
+                        value={maxBackups}
+                        onChange={(e) => setMaxBackups(parseInt(e.target.value) || 20)}
+                        className="w-20 text-center"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Google Drive API Configuration */}
                 <Card className="glass-card">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Settings className="w-5 h-5" />
-                      Google Drive কনফিগারেশন
+                      Google Drive API কনফিগারেশন
                     </CardTitle>
                     <CardDescription>
                       অটোমেটিক ব্যাকআপের জন্য Google Cloud Console থেকে API কী সেটআপ করুন
@@ -339,7 +479,7 @@ const Backup = () => {
                     <Accordion type="single" collapsible className="w-full">
                       <AccordionItem value="setup">
                         <AccordionTrigger className="text-primary">
-                          📖 Google Drive API সেটআপ গাইড
+                          📖 Google Drive API সেটআপ গাইড (ক্লিক করুন)
                         </AccordionTrigger>
                         <AccordionContent className="space-y-4 text-sm">
                           <div className="space-y-3 p-4 bg-muted/50 rounded-lg">
@@ -419,10 +559,10 @@ const Backup = () => {
                           onChange={(e) => setDriveApiKey(e.target.value)}
                         />
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-2 md:col-span-2">
                         <Label className="flex items-center gap-2">
                           <FolderOpen className="w-4 h-4" />
-                          Folder ID (ঐচ্ছিক)
+                          Folder ID (ঐচ্ছিক - নির্দিষ্ট ফোল্ডারে ব্যাকআপ রাখতে)
                         </Label>
                         <Input
                           placeholder="1abc2def3ghi..."
@@ -430,35 +570,6 @@ const Backup = () => {
                           onChange={(e) => setDriveFolderId(e.target.value)}
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label className="flex items-center gap-2">
-                          <Timer className="w-4 h-4" />
-                          অটো ব্যাকআপ ইন্টারভাল
-                        </Label>
-                        <Select
-                          value={autoBackupInterval}
-                          onValueChange={(v: any) => setAutoBackupInterval(v)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="daily">প্রতিদিন</SelectItem>
-                            <SelectItem value="weekly">প্রতি সপ্তাহে</SelectItem>
-                            <SelectItem value="monthly">প্রতি মাসে</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-                      <div className="space-y-1">
-                        <Label>অটোমেটিক ব্যাকআপ</Label>
-                        <p className="text-xs text-muted-foreground">
-                          নির্ধারিত সময়ে স্বয়ংক্রিয়ভাবে Google Drive এ ব্যাকআপ হবে
-                        </p>
-                      </div>
-                      <Switch checked={autoBackup} onCheckedChange={setAutoBackup} />
                     </div>
 
                     <div className="flex gap-3">
@@ -483,7 +594,7 @@ const Backup = () => {
                         ) : (
                           <>
                             <Cloud className="w-4 h-4 mr-2" />
-                            Google Drive এ আপলোড
+                            এখনই ব্যাকআপ করুন
                           </>
                         )}
                       </Button>
@@ -501,7 +612,7 @@ const Backup = () => {
                   ব্যাকআপ ইতিহাস
                 </CardTitle>
                 <CardDescription>
-                  সাম্প্রতিক ব্যাকআপগুলো (সর্বোচ্চ ১০টি সংরক্ষিত)
+                  সাম্প্রতিক ব্যাকআপগুলো (লোকাল: সর্বোচ্চ ১০টি, Drive: সর্বোচ্চ {maxBackups}টি)
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -550,7 +661,7 @@ const Backup = () => {
                           <TableCell>
                             <Badge
                               variant="outline"
-                              className={`gap-1 ${backup.type === "google_drive" ? "text-info" : ""}`}
+                              className={`gap-1 ${backup.type === "google_drive" ? "text-info border-info/50" : ""}`}
                             >
                               {backup.type === "google_drive" ? (
                                 <>
@@ -636,13 +747,13 @@ const Backup = () => {
               <div className="flex gap-3">
                 <CheckCircle className="w-5 h-5 text-info shrink-0 mt-0.5" />
                 <div className="text-sm">
-                  <p className="font-medium text-foreground mb-1">ব্যাকআপ সম্পর্কে</p>
+                  <p className="font-medium text-foreground mb-1">অটো-ব্যাকআপ সম্পর্কে</p>
                   <ul className="text-muted-foreground space-y-1">
-                    <li>• ব্যাকআপে সমস্ত ১০টি ডাটাবেস টেবিলের ডাটা থাকে</li>
-                    <li>• SQL ফরম্যাট সরাসরি PostgreSQL এ ইম্পোর্ট করা যায়</li>
-                    <li>• JSON ফরম্যাট এই অ্যাপ থেকে রিস্টোর করা যায়</li>
-                    <li>• লোকাল স্টোরেজে সর্বোচ্চ ১০টি ব্যাকআপ সংরক্ষিত থাকে</li>
-                    <li>• রিস্টোর করার আগে বর্তমান ডাটার ব্যাকআপ নিন</li>
+                    <li>• <strong>রিয়েলটাইম ব্যাকআপ:</strong> মামলা, চেক, মক্কেল ইত্যাদি যোগ/পরিবর্তন হলে সাথে সাথে ব্যাকআপ</li>
+                    <li>• <strong>দৈনিক ব্যাকআপ:</strong> আপনার নির্ধারিত সময়ে প্রতিদিন একবার ব্যাকআপ</li>
+                    <li>• সর্বোচ্চ {maxBackups}টি ব্যাকআপ Google Drive এ সংরক্ষিত থাকবে</li>
+                    <li>• পুরাতন ব্যাকআপ স্বয়ংক্রিয়ভাবে মুছে যাবে</li>
+                    <li>• অ্যাপ চালু থাকলে অটো-ব্যাকআপ কাজ করবে</li>
                   </ul>
                 </div>
               </div>

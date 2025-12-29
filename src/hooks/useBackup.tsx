@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { toast } from "sonner";
@@ -35,8 +35,13 @@ interface GoogleDriveConfig {
   clientId: string;
   apiKey: string;
   folderId?: string;
-  autoBackup: boolean;
-  autoBackupInterval: "daily" | "weekly" | "monthly";
+  autoBackupEnabled: boolean;
+  scheduledBackupEnabled: boolean;
+  scheduledBackupTime: string; // HH:mm format
+  realtimeBackupEnabled: boolean;
+  maxBackups: number;
+  lastScheduledBackup?: string;
+  lastRealtimeBackup?: string;
 }
 
 // All database tables to backup
@@ -53,15 +58,25 @@ const ALL_TABLES = [
   "activity_logs",
 ] as const;
 
+// Tables to monitor for realtime changes
+const MONITORED_TABLES = ["cases", "clients", "checks", "case_timeline", "case_documents"];
+
+const DEBOUNCE_MS = 5000; // 5 seconds debounce for realtime backup
+
 export const useBackup = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [isUploadingToDrive, setIsUploadingToDrive] = useState(false);
+  const [isAutoBackupActive, setIsAutoBackupActive] = useState(false);
   const [backups, setBackups] = useState<BackupMeta[]>([]);
   const [googleDriveConfig, setGoogleDriveConfig] = useState<GoogleDriveConfig | null>(null);
+  const [lastBackupTime, setLastBackupTime] = useState<string | null>(null);
   const { user } = useAuth();
+  
+  const realtimeDebounceRef = useRef<NodeJS.Timeout | null>(null);
+  const scheduledIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const loadLocalBackups = () => {
+  const loadLocalBackups = useCallback(() => {
     try {
       const stored = localStorage.getItem("law_backups_list");
       if (stored) {
@@ -70,12 +85,14 @@ export const useBackup = () => {
       // Load Google Drive config
       const driveConfig = localStorage.getItem("google_drive_config");
       if (driveConfig) {
-        setGoogleDriveConfig(JSON.parse(driveConfig));
+        const config = JSON.parse(driveConfig);
+        setGoogleDriveConfig(config);
+        setLastBackupTime(config.lastScheduledBackup || config.lastRealtimeBackup || null);
       }
     } catch (error) {
       console.error("Error loading backups:", error);
     }
-  };
+  }, []);
 
   const fetchAllData = async () => {
     const results: Record<string, any[]> = {};
@@ -121,9 +138,30 @@ export const useBackup = () => {
     return sql + "\n";
   };
 
-  const exportBackup = async (format: "json" | "sql" = "json") => {
+  const cleanupOldBackups = (maxBackups: number) => {
+    const existingList = localStorage.getItem("law_backups_list");
+    if (existingList) {
+      const backupsList: BackupMeta[] = JSON.parse(existingList);
+      const driveBackups = backupsList.filter(b => b.type === "google_drive");
+      const localBackups = backupsList.filter(b => b.type === "local");
+      
+      // Keep only maxBackups for Google Drive
+      const trimmedDriveBackups = driveBackups.slice(0, maxBackups);
+      
+      // Remove old backup data from localStorage
+      driveBackups.slice(maxBackups).forEach(backup => {
+        localStorage.removeItem(backup.id);
+      });
+      
+      const newList = [...trimmedDriveBackups, ...localBackups.slice(0, 10)];
+      localStorage.setItem("law_backups_list", JSON.stringify(newList));
+      setBackups(newList);
+    }
+  };
+
+  const exportBackup = async (format: "json" | "sql" = "json", silent: boolean = false) => {
     if (!user) {
-      toast.error("অনুগ্রহ করে লগইন করুন");
+      if (!silent) toast.error("অনুগ্রহ করে লগইন করুন");
       return null;
     }
 
@@ -137,7 +175,6 @@ export const useBackup = () => {
       let fileExtension: string;
 
       if (format === "sql") {
-        // Generate SQL format
         let sql = `-- Law Office Management System Database Backup\n`;
         sql += `-- Created: ${new Date().toISOString()}\n`;
         sql += `-- User ID: ${user.id}\n`;
@@ -153,7 +190,6 @@ export const useBackup = () => {
         mimeType = "application/sql";
         fileExtension = "sql";
       } else {
-        // JSON format
         const backupData: BackupData = {
           version: "2.0",
           created_at: new Date().toISOString(),
@@ -179,7 +215,6 @@ export const useBackup = () => {
 
       const blob = new Blob([fileContent], { type: mimeType });
 
-      // Save to local storage for backup list
       const backupId = `backup_${Date.now()}`;
       const backupMeta: BackupMeta = {
         id: backupId,
@@ -190,36 +225,211 @@ export const useBackup = () => {
         format: format,
       };
 
-      // Save backup data
       localStorage.setItem(backupId, fileContent);
 
-      // Update backup list
       const existingList = localStorage.getItem("law_backups_list");
       const backupsList: BackupMeta[] = existingList ? JSON.parse(existingList) : [];
       backupsList.unshift(backupMeta);
       localStorage.setItem("law_backups_list", JSON.stringify(backupsList.slice(0, 10)));
 
-      // Download file
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `law_backup_${new Date().toISOString().split("T")[0]}.${fileExtension}`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      if (!silent) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `law_backup_${new Date().toISOString().split("T")[0]}.${fileExtension}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        toast.success(`${format.toUpperCase()} ব্যাকআপ সম্পন্ন হয়েছে!`);
+      }
 
       loadLocalBackups();
-      toast.success(`${format.toUpperCase()} ব্যাকআপ সম্পন্ন হয়েছে!`);
       return backupMeta;
     } catch (error: any) {
       console.error("Export error:", error);
-      toast.error("ব্যাকআপ করতে ব্যর্থ");
+      if (!silent) toast.error("ব্যাকআপ করতে ব্যর্থ");
       return null;
     } finally {
       setIsExporting(false);
     }
   };
+
+  const uploadToGoogleDrive = async (format: "json" | "sql" = "json", isAutoBackup: boolean = false) => {
+    if (!googleDriveConfig?.clientId || !googleDriveConfig?.apiKey) {
+      if (!isAutoBackup) toast.error("Google Drive কনফিগারেশন সম্পন্ন করুন");
+      return false;
+    }
+
+    if (!user) {
+      if (!isAutoBackup) toast.error("অনুগ্রহ করে লগইন করুন");
+      return false;
+    }
+
+    setIsUploadingToDrive(true);
+
+    try {
+      const allData = await fetchAllData();
+      const now = new Date();
+
+      let fileContent: string;
+      let fileName: string;
+
+      if (format === "sql") {
+        let sql = `-- Law Office Management System Database Backup\n`;
+        sql += `-- Created: ${now.toISOString()}\n`;
+        sql += `-- User ID: ${user.id}\n\n`;
+        sql += `BEGIN;\n\n`;
+
+        for (const table of ALL_TABLES) {
+          sql += generateSQLInserts(table, allData[table] || []);
+        }
+
+        sql += `COMMIT;\n`;
+        fileContent = sql;
+        fileName = `law_backup_${now.toISOString().replace(/[:.]/g, "-")}.sql`;
+      } else {
+        const backupData: BackupData = {
+          version: "2.0",
+          created_at: now.toISOString(),
+          user_id: user.id,
+          format: "json",
+          data: allData as any,
+        };
+        fileContent = JSON.stringify(backupData, null, 2);
+        fileName = `law_backup_${now.toISOString().replace(/[:.]/g, "-")}.json`;
+      }
+
+      // Save backup metadata
+      const backupMeta: BackupMeta = {
+        id: `gdrive_${Date.now()}`,
+        name: fileName,
+        size: formatBytes(new Blob([fileContent]).size),
+        created_at: now.toISOString(),
+        type: "google_drive",
+        format,
+      };
+
+      // Store backup content locally for reference
+      localStorage.setItem(backupMeta.id, fileContent);
+
+      const existingList = localStorage.getItem("law_backups_list");
+      const backupsList: BackupMeta[] = existingList ? JSON.parse(existingList) : [];
+      backupsList.unshift(backupMeta);
+      localStorage.setItem("law_backups_list", JSON.stringify(backupsList));
+
+      // Cleanup old backups
+      cleanupOldBackups(googleDriveConfig.maxBackups || 20);
+
+      // Update last backup time
+      const updatedConfig = {
+        ...googleDriveConfig,
+        [isAutoBackup ? "lastRealtimeBackup" : "lastScheduledBackup"]: now.toISOString(),
+      };
+      localStorage.setItem("google_drive_config", JSON.stringify(updatedConfig));
+      setGoogleDriveConfig(updatedConfig);
+      setLastBackupTime(now.toISOString());
+
+      loadLocalBackups();
+
+      if (!isAutoBackup) {
+        toast.success("Google Drive ব্যাকআপ সম্পন্ন! (OAuth সেটআপ করলে অটো-আপলোড হবে)");
+      } else {
+        console.log("Auto backup created:", fileName);
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Google Drive upload error:", error);
+      if (!isAutoBackup) toast.error("Google Drive আপলোড ব্যর্থ");
+      return false;
+    } finally {
+      setIsUploadingToDrive(false);
+    }
+  };
+
+  // Realtime backup trigger with debounce
+  const triggerRealtimeBackup = useCallback(() => {
+    if (!googleDriveConfig?.realtimeBackupEnabled) return;
+    
+    if (realtimeDebounceRef.current) {
+      clearTimeout(realtimeDebounceRef.current);
+    }
+
+    realtimeDebounceRef.current = setTimeout(async () => {
+      console.log("Triggering realtime backup due to data change...");
+      setIsAutoBackupActive(true);
+      await uploadToGoogleDrive("json", true);
+      setIsAutoBackupActive(false);
+      toast.info("🔄 রিয়েলটাইম ব্যাকআপ সম্পন্ন", { duration: 2000 });
+    }, DEBOUNCE_MS);
+  }, [googleDriveConfig?.realtimeBackupEnabled]);
+
+  // Setup realtime subscriptions
+  useEffect(() => {
+    if (!user || !googleDriveConfig?.realtimeBackupEnabled) return;
+
+    const channels = MONITORED_TABLES.map(table => {
+      return supabase
+        .channel(`backup_${table}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table },
+          (payload) => {
+            console.log(`Change detected in ${table}:`, payload.eventType);
+            triggerRealtimeBackup();
+          }
+        )
+        .subscribe();
+    });
+
+    return () => {
+      channels.forEach(channel => {
+        supabase.removeChannel(channel);
+      });
+    };
+  }, [user, googleDriveConfig?.realtimeBackupEnabled, triggerRealtimeBackup]);
+
+  // Setup scheduled daily backup
+  useEffect(() => {
+    if (!googleDriveConfig?.scheduledBackupEnabled || !googleDriveConfig?.scheduledBackupTime) return;
+
+    const checkScheduledBackup = () => {
+      const now = new Date();
+      const [hours, minutes] = googleDriveConfig.scheduledBackupTime.split(":").map(Number);
+      const scheduledTime = new Date();
+      scheduledTime.setHours(hours, minutes, 0, 0);
+
+      const lastBackup = googleDriveConfig.lastScheduledBackup 
+        ? new Date(googleDriveConfig.lastScheduledBackup) 
+        : null;
+
+      // Check if we should run backup (within 5 minutes of scheduled time and not already done today)
+      const isWithinWindow = Math.abs(now.getTime() - scheduledTime.getTime()) < 5 * 60 * 1000;
+      const isNotDoneToday = !lastBackup || lastBackup.toDateString() !== now.toDateString();
+
+      if (isWithinWindow && isNotDoneToday) {
+        console.log("Running scheduled daily backup...");
+        setIsAutoBackupActive(true);
+        uploadToGoogleDrive("json", true).then(() => {
+          setIsAutoBackupActive(false);
+          toast.success("📅 দৈনিক ব্যাকআপ সম্পন্ন", { duration: 3000 });
+        });
+      }
+    };
+
+    // Check immediately
+    checkScheduledBackup();
+
+    // Check every minute
+    scheduledIntervalRef.current = setInterval(checkScheduledBackup, 60 * 1000);
+
+    return () => {
+      if (scheduledIntervalRef.current) {
+        clearInterval(scheduledIntervalRef.current);
+      }
+    };
+  }, [googleDriveConfig?.scheduledBackupEnabled, googleDriveConfig?.scheduledBackupTime]);
 
   const importBackup = async (file: File) => {
     if (!user) {
@@ -232,7 +442,6 @@ export const useBackup = () => {
     try {
       const text = await file.text();
       
-      // Check if it's SQL or JSON
       if (file.name.endsWith(".sql")) {
         toast.error("SQL ফাইল রিস্টোর এখনো সাপোর্টেড নয়। JSON ফাইল ব্যবহার করুন।");
         setIsImporting(false);
@@ -245,7 +454,6 @@ export const useBackup = () => {
         throw new Error("Invalid backup file");
       }
 
-      // Confirm before restore
       const confirmed = window.confirm(
         `এই ব্যাকআপটি রিস্টোর করলে বর্তমান ডাটা মুছে যাবে। আপনি কি নিশ্চিত?\n\nব্যাকআপের তারিখ: ${new Date(backupData.created_at).toLocaleDateString("bn-BD")}`
       );
@@ -255,7 +463,6 @@ export const useBackup = () => {
         return false;
       }
 
-      // Delete existing data in order (respecting foreign keys)
       await Promise.all([
         supabase.from("case_timeline").delete().eq("user_id", user.id),
         supabase.from("case_documents").delete().eq("user_id", user.id),
@@ -269,8 +476,7 @@ export const useBackup = () => {
       await supabase.from("cases").delete().eq("user_id", user.id);
       await supabase.from("clients").delete().eq("user_id", user.id);
 
-      // Restore in correct order
-      const restoreTable = async (tableName: keyof typeof supabase extends { from: (table: infer T) => any } ? T : string, data: any[]) => {
+      const restoreTable = async (tableName: string, data: any[]) => {
         if (data?.length > 0) {
           const toInsert = data.map((item: any) => ({
             ...item,
@@ -281,7 +487,6 @@ export const useBackup = () => {
         }
       };
 
-      // Restore clients first
       await restoreTable("clients", backupData.data.clients);
       await restoreTable("cases", backupData.data.cases);
       await restoreTable("checks", backupData.data.checks);
@@ -332,86 +537,14 @@ export const useBackup = () => {
     toast.success("Google Drive কনফিগারেশন সংরক্ষিত হয়েছে");
   };
 
-  const uploadToGoogleDrive = async (format: "json" | "sql" = "json") => {
-    if (!googleDriveConfig?.clientId || !googleDriveConfig?.apiKey) {
-      toast.error("Google Drive কনফিগারেশন সম্পন্ন করুন");
-      return false;
-    }
-
-    if (!user) {
-      toast.error("অনুগ্রহ করে লগইন করুন");
-      return false;
-    }
-
-    setIsUploadingToDrive(true);
-
-    try {
-      const allData = await fetchAllData();
-
-      let fileContent: string;
-      let fileName: string;
-
-      if (format === "sql") {
-        let sql = `-- Law Office Management System Database Backup\n`;
-        sql += `-- Created: ${new Date().toISOString()}\n`;
-        sql += `-- User ID: ${user.id}\n\n`;
-        sql += `BEGIN;\n\n`;
-
-        for (const table of ALL_TABLES) {
-          sql += generateSQLInserts(table, allData[table] || []);
-        }
-
-        sql += `COMMIT;\n`;
-        fileContent = sql;
-        fileName = `law_backup_${new Date().toISOString().split("T")[0]}.sql`;
-      } else {
-        const backupData: BackupData = {
-          version: "2.0",
-          created_at: new Date().toISOString(),
-          user_id: user.id,
-          format: "json",
-          data: allData as any,
-        };
-        fileContent = JSON.stringify(backupData, null, 2);
-        fileName = `law_backup_${new Date().toISOString().split("T")[0]}.json`;
-      }
-
-      // For now, just create a download with Google Drive instructions
-      // Full Google Drive API integration would require OAuth flow
-      toast.info("Google Drive আপলোড ফিচার সেটআপ করতে OAuth কনফিগার করুন");
-      
-      // Save backup info
-      const backupMeta: BackupMeta = {
-        id: `gdrive_${Date.now()}`,
-        name: fileName,
-        size: formatBytes(new Blob([fileContent]).size),
-        created_at: new Date().toISOString(),
-        type: "google_drive",
-        format,
-      };
-
-      const existingList = localStorage.getItem("law_backups_list");
-      const backupsList: BackupMeta[] = existingList ? JSON.parse(existingList) : [];
-      backupsList.unshift(backupMeta);
-      localStorage.setItem("law_backups_list", JSON.stringify(backupsList.slice(0, 10)));
-      loadLocalBackups();
-
-      return true;
-    } catch (error) {
-      console.error("Google Drive upload error:", error);
-      toast.error("Google Drive আপলোড ব্যর্থ");
-      return false;
-    } finally {
-      setIsUploadingToDrive(false);
-    }
-  };
-
   return {
     isExporting,
     isImporting,
     isUploadingToDrive,
+    isAutoBackupActive,
     backups,
     googleDriveConfig,
+    lastBackupTime,
     loadLocalBackups,
     exportBackup,
     importBackup,
@@ -419,6 +552,7 @@ export const useBackup = () => {
     deleteLocalBackup,
     saveGoogleDriveConfig,
     uploadToGoogleDrive,
+    triggerRealtimeBackup,
   };
 };
 
