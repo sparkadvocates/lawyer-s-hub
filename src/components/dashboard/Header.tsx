@@ -1,4 +1,5 @@
-import { Bell, Search, Plus } from "lucide-react";
+import { Bell, Search, Plus, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,8 +11,30 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 const Header = () => {
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success("Signed out successfully");
+    navigate("/login");
+  };
+
+  const getUserInitials = () => {
+    if (!user?.email) return "U";
+    const email = user.email;
+    return email.substring(0, 2).toUpperCase();
+  };
+
+  const getUserDisplayName = () => {
+    if (!user?.email) return "User";
+    return user.email.split("@")[0];
+  };
+
   return (
     <header className="h-16 border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50 px-6 flex items-center justify-between">
       {/* Search */}
@@ -69,12 +92,12 @@ const Header = () => {
             <Button variant="ghost" className="flex items-center gap-3 px-2">
               <Avatar className="w-8 h-8">
                 <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
-                  JD
+                  {getUserInitials()}
                 </AvatarFallback>
               </Avatar>
               <div className="hidden lg:block text-left">
-                <p className="text-sm font-medium">John Doe</p>
-                <p className="text-xs text-muted-foreground">Senior Partner</p>
+                <p className="text-sm font-medium">{getUserDisplayName()}</p>
+                <p className="text-xs text-muted-foreground">{user?.email}</p>
               </div>
             </Button>
           </DropdownMenuTrigger>
@@ -85,7 +108,10 @@ const Header = () => {
             <DropdownMenuItem>Billing</DropdownMenuItem>
             <DropdownMenuItem>Team</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">Sign out</DropdownMenuItem>
+            <DropdownMenuItem className="text-destructive" onClick={handleSignOut}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign out
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
