@@ -10,6 +10,7 @@ import Calendar from "./pages/Calendar";
 import Cases from "./pages/Cases";
 import TimeTracking from "./pages/TimeTracking";
 import Clients from "./pages/Clients";
+import Documents from "./pages/Documents";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/dashboard/cases" element={<Cases />} />
           <Route path="/dashboard/time" element={<TimeTracking />} />
           <Route path="/dashboard/clients" element={<Clients />} />
+          <Route path="/dashboard/documents" element={<Documents />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
