@@ -261,6 +261,33 @@ export type Database = {
         }
         Relationships: []
       }
+      email_settings: {
+        Row: {
+          created_at: string
+          from_email: string
+          from_name: string | null
+          id: string
+          resend_api_key: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          from_email?: string
+          from_name?: string | null
+          id?: string
+          resend_api_key?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          from_email?: string
+          from_name?: string | null
+          id?: string
+          resend_api_key?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           action_url: string | null
