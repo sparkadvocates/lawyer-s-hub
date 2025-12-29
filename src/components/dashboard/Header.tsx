@@ -51,7 +51,7 @@ const Header = () => {
       {/* Right Section */}
       <div className="flex items-center gap-4 ml-auto">
         {/* Quick Actions */}
-        <Button variant="gold" size="sm" className="hidden sm:flex">
+        <Button variant="gold" size="sm" className="hidden sm:flex" onClick={() => navigate("/dashboard/cases")}>
           <Plus className="w-4 h-4" />
           New Case
         </Button>
@@ -80,9 +80,9 @@ const Header = () => {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Profile Settings</DropdownMenuItem>
-            <DropdownMenuItem>Billing</DropdownMenuItem>
-            <DropdownMenuItem>Team</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/dashboard/admin/settings")}>Profile Settings</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/dashboard/billing")}>Billing</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/dashboard/clients")}>Team</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-destructive" onClick={handleSignOut}>
               <LogOut className="w-4 h-4 mr-2" />
