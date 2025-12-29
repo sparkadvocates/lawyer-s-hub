@@ -160,7 +160,7 @@ const Checks = () => {
           <div className="max-w-7xl mx-auto space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-display font-bold text-foreground">চেক ম্যানেজমেন্ট</h1>
+                <h1 className="text-3xl font-display font-bold text-foreground">Cheque ম্যানেজমেন্ট</h1>
                 <p className="text-muted-foreground mt-1">চেক ডিস অনার ও লিগ্যাল নোটিশ ট্র্যাকিং</p>
               </div>
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
