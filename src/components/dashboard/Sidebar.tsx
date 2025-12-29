@@ -41,7 +41,11 @@ const Sidebar = () => {
   const { signOut, isAdmin } = useAuth();
 
   const bottomItems = [
-    ...(isAdmin ? [{ icon: ShieldCheck, label: "Admin Settings", path: "/dashboard/settings" }] : []),
+    ...(isAdmin ? [
+      { icon: BarChart3, label: "Reports", path: "/dashboard/reports" },
+      { icon: CreditCard, label: "Packages", path: "/dashboard/packages" },
+      { icon: ShieldCheck, label: "Admin Settings", path: "/dashboard/settings" },
+    ] : []),
   ];
 
   const handleLogout = async () => {

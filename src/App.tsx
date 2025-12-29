@@ -17,6 +17,8 @@ import Clients from "./pages/Clients";
 import Documents from "./pages/Documents";
 import CourtDates from "./pages/CourtDates";
 import AdminSettings from "./pages/AdminSettings";
+import AdminReports from "./pages/AdminReports";
+import AdminPackages from "./pages/AdminPackages";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -101,6 +103,22 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <AdminSettings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/reports"
+              element={
+                <ProtectedRoute>
+                  <AdminReports />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/packages"
+              element={
+                <ProtectedRoute>
+                  <AdminPackages />
                 </ProtectedRoute>
               }
             />
