@@ -13,10 +13,11 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { RoleBadge } from "@/components/RoleBadge";
 
 const Header = () => {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, signOut, role } = useAuth();
 
   const handleSignOut = async () => {
     await signOut();
@@ -95,8 +96,11 @@ const Header = () => {
                   {getUserInitials()}
                 </AvatarFallback>
               </Avatar>
-              <div className="hidden lg:block text-left">
-                <p className="text-sm font-medium">{getUserDisplayName()}</p>
+              <div className="hidden lg:flex flex-col items-start">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium">{getUserDisplayName()}</p>
+                  <RoleBadge role={role} showIcon={false} />
+                </div>
                 <p className="text-xs text-muted-foreground">{user?.email}</p>
               </div>
             </Button>
