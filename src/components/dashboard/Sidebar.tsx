@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   BarChart3,
   CreditCard,
+  FileCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
   { icon: Briefcase, label: "Cases", path: "/dashboard/cases" },
   { icon: Users, label: "Clients", path: "/dashboard/clients" },
+  { icon: FileCheck, label: "Checks", path: "/dashboard/checks" },
   { icon: Calendar, label: "Calendar", path: "/dashboard/calendar" },
   { icon: FileText, label: "Documents", path: "/dashboard/documents" },
   { icon: Clock, label: "Time Tracking", path: "/dashboard/time" },
