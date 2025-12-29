@@ -14,6 +14,7 @@ import TimeTracking from "./pages/TimeTracking";
 import Clients from "./pages/Clients";
 import Documents from "./pages/Documents";
 import CourtDates from "./pages/CourtDates";
+import AdminSettings from "./pages/AdminSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -81,6 +82,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <CourtDates />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/settings"
+              element={
+                <ProtectedRoute>
+                  <AdminSettings />
                 </ProtectedRoute>
               }
             />

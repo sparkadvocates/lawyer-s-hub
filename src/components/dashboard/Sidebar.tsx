@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Gavel,
   MessageSquare,
+  ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -33,15 +34,15 @@ const menuItems = [
   { icon: MessageSquare, label: "Messages", path: "/dashboard/messages" },
 ];
 
-const bottomItems = [
-  { icon: Settings, label: "Settings", path: "/dashboard/settings" },
-];
-
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { signOut, isAdmin } = useAuth();
+
+  const bottomItems = [
+    ...(isAdmin ? [{ icon: ShieldCheck, label: "Admin Settings", path: "/dashboard/settings" }] : []),
+  ];
 
   const handleLogout = async () => {
     await signOut();
