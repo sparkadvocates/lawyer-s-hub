@@ -14,11 +14,28 @@ import {
   CheckCircle,
   Loader2,
   FileJson,
+  FileCode,
+  Settings,
+  ExternalLink,
+  Key,
+  FolderOpen,
+  Timer,
+  Save,
 } from "lucide-react";
 import Sidebar from "@/components/dashboard/Sidebar";
 import Header from "@/components/dashboard/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import {
   Card,
   CardContent,
@@ -45,24 +62,57 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { useBackup } from "@/hooks/useBackup";
 
 const Backup = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [exportFormat, setExportFormat] = useState<"json" | "sql">("sql");
+  const [driveClientId, setDriveClientId] = useState("");
+  const [driveApiKey, setDriveApiKey] = useState("");
+  const [driveFolderId, setDriveFolderId] = useState("");
+  const [autoBackup, setAutoBackup] = useState(false);
+  const [autoBackupInterval, setAutoBackupInterval] = useState<"daily" | "weekly" | "monthly">("daily");
+
   const {
     isExporting,
     isImporting,
+    isUploadingToDrive,
     backups,
+    googleDriveConfig,
     loadLocalBackups,
     exportBackup,
     importBackup,
     restoreFromLocal,
     deleteLocalBackup,
+    saveGoogleDriveConfig,
+    uploadToGoogleDrive,
   } = useBackup();
 
   useEffect(() => {
     loadLocalBackups();
   }, []);
+
+  useEffect(() => {
+    if (googleDriveConfig) {
+      setDriveClientId(googleDriveConfig.clientId || "");
+      setDriveApiKey(googleDriveConfig.apiKey || "");
+      setDriveFolderId(googleDriveConfig.folderId || "");
+      setAutoBackup(googleDriveConfig.autoBackup || false);
+      setAutoBackupInterval(googleDriveConfig.autoBackupInterval || "daily");
+    }
+  }, [googleDriveConfig]);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -84,119 +134,364 @@ const Backup = () => {
     }
   };
 
+  const handleSaveGoogleDriveConfig = () => {
+    saveGoogleDriveConfig({
+      clientId: driveClientId,
+      apiKey: driveApiKey,
+      folderId: driveFolderId,
+      autoBackup,
+      autoBackupInterval,
+    });
+  };
+
+  const allTables = [
+    { name: "cases", label: "মামলা", icon: "⚖️" },
+    { name: "clients", label: "মক্কেল", icon: "👥" },
+    { name: "checks", label: "চেক", icon: "📝" },
+    { name: "case_timeline", label: "মামলা টাইমলাইন", icon: "📅" },
+    { name: "case_documents", label: "ডকুমেন্ট", icon: "📁" },
+    { name: "notifications", label: "নোটিফিকেশন", icon: "🔔" },
+    { name: "profiles", label: "প্রোফাইল", icon: "👤" },
+    { name: "user_subscriptions", label: "সাবস্ক্রিপশন", icon: "💳" },
+    { name: "payment_history", label: "পেমেন্ট ইতিহাস", icon: "💰" },
+    { name: "activity_logs", label: "অ্যাক্টিভিটি লগ", icon: "📊" },
+  ];
+
   return (
     <div className="min-h-screen bg-background flex">
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <Header />
         <main className="flex-1 p-6 overflow-auto">
-          <div className="max-w-5xl mx-auto space-y-6">
+          <div className="max-w-6xl mx-auto space-y-6">
             {/* Page Header */}
             <div>
               <h1 className="text-3xl font-display font-bold text-foreground">
-                ডাটাবেস ব্যাকআপ
+                ডাটাবেস ব্যাকআপ ও রিস্টোর
               </h1>
               <p className="text-muted-foreground mt-1">
-                আপনার সমস্ত ডাটা ব্যাকআপ এবং রিস্টোর করুন
+                সম্পূর্ণ ডাটাবেস ব্যাকআপ, রিস্টোর এবং Google Drive সিঙ্ক
               </p>
             </div>
 
-            {/* Action Cards */}
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Export Card */}
-              <Card className="glass-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Download className="w-5 h-5 text-primary" />
-                    ব্যাকআপ তৈরি করুন
-                  </CardTitle>
-                  <CardDescription>
-                    সমস্ত মামলা, মক্কেল, চেক এবং ডকুমেন্ট ডাটা JSON ফাইলে এক্সপোর্ট করুন
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <HardDrive className="w-4 h-4" />
-                    <span>লোকাল স্টোরেজ + ডাউনলোড</span>
-                  </div>
-                  <Button
-                    className="w-full gradient-gold text-primary-foreground"
-                    onClick={exportBackup}
-                    disabled={isExporting}
-                  >
-                    {isExporting ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        ব্যাকআপ হচ্ছে...
-                      </>
-                    ) : (
-                      <>
-                        <Download className="w-4 h-4 mr-2" />
-                        এখনই ব্যাকআপ নিন
-                      </>
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Import Card */}
-              <Card className="glass-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Upload className="w-5 h-5 text-info" />
-                    ব্যাকআপ রিস্টোর করুন
-                  </CardTitle>
-                  <CardDescription>
-                    আগের ব্যাকআপ ফাইল থেকে সমস্ত ডাটা পুনরুদ্ধার করুন
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-2 text-sm text-warning">
-                    <AlertCircle className="w-4 h-4" />
-                    <span>সতর্কতা: বর্তমান ডাটা প্রতিস্থাপিত হবে</span>
-                  </div>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".json"
-                    className="hidden"
-                    onChange={handleFileSelect}
-                  />
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isImporting}
-                  >
-                    {isImporting ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        রিস্টোর হচ্ছে...
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="w-4 h-4 mr-2" />
-                        JSON ফাইল আপলোড করুন
-                      </>
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Google Drive Coming Soon */}
-            <Card className="glass-card opacity-75">
+            {/* Database Tables Info */}
+            <Card className="glass-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Cloud className="w-5 h-5 text-muted-foreground" />
-                  Google Drive ব্যাকআপ
-                  <Badge variant="outline" className="ml-2">শীঘ্রই আসছে</Badge>
+                  <Database className="w-5 h-5 text-primary" />
+                  ব্যাকআপে অন্তর্ভুক্ত টেবিল
                 </CardTitle>
                 <CardDescription>
-                  স্বয়ংক্রিয় Google Drive ব্যাকআপ শীঘ্রই যোগ হবে
+                  নিম্নলিখিত সমস্ত ডাটাবেস টেবিল ব্যাকআপে সংরক্ষিত হবে
                 </CardDescription>
               </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                  {allTables.map((table) => (
+                    <div
+                      key={table.name}
+                      className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 border border-border"
+                    >
+                      <span className="text-lg">{table.icon}</span>
+                      <span className="text-sm font-medium">{table.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
             </Card>
+
+            <Tabs defaultValue="local" className="space-y-6">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="local" className="gap-2">
+                  <HardDrive className="w-4 h-4" />
+                  লোকাল ব্যাকআপ
+                </TabsTrigger>
+                <TabsTrigger value="gdrive" className="gap-2">
+                  <Cloud className="w-4 h-4" />
+                  Google Drive
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Local Backup Tab */}
+              <TabsContent value="local" className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Export Card */}
+                  <Card className="glass-card">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Download className="w-5 h-5 text-primary" />
+                        ব্যাকআপ তৈরি করুন
+                      </CardTitle>
+                      <CardDescription>
+                        সম্পূর্ণ ডাটাবেস SQL বা JSON ফরম্যাটে ডাউনলোড করুন
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>ফরম্যাট নির্বাচন করুন</Label>
+                        <div className="flex gap-2">
+                          <Button
+                            variant={exportFormat === "sql" ? "default" : "outline"}
+                            className="flex-1 gap-2"
+                            onClick={() => setExportFormat("sql")}
+                          >
+                            <FileCode className="w-4 h-4" />
+                            SQL
+                          </Button>
+                          <Button
+                            variant={exportFormat === "json" ? "default" : "outline"}
+                            className="flex-1 gap-2"
+                            onClick={() => setExportFormat("json")}
+                          >
+                            <FileJson className="w-4 h-4" />
+                            JSON
+                          </Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {exportFormat === "sql"
+                            ? "SQL ফরম্যাট সরাসরি ডাটাবেসে ইম্পোর্ট করা যায়"
+                            : "JSON ফরম্যাট এই অ্যাপে রিস্টোর করা যায়"}
+                        </p>
+                      </div>
+                      <Button
+                        className="w-full gradient-gold text-primary-foreground"
+                        onClick={() => exportBackup(exportFormat)}
+                        disabled={isExporting}
+                      >
+                        {isExporting ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            ব্যাকআপ হচ্ছে...
+                          </>
+                        ) : (
+                          <>
+                            <Download className="w-4 h-4 mr-2" />
+                            {exportFormat.toUpperCase()} ব্যাকআপ ডাউনলোড করুন
+                          </>
+                        )}
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  {/* Import Card */}
+                  <Card className="glass-card">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Upload className="w-5 h-5 text-info" />
+                        ব্যাকআপ রিস্টোর করুন
+                      </CardTitle>
+                      <CardDescription>
+                        আগের ব্যাকআপ ফাইল থেকে সমস্ত ডাটা পুনরুদ্ধার করুন
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center gap-2 text-sm text-warning">
+                        <AlertCircle className="w-4 h-4" />
+                        <span>সতর্কতা: বর্তমান ডাটা প্রতিস্থাপিত হবে</span>
+                      </div>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".json"
+                        className="hidden"
+                        onChange={handleFileSelect}
+                      />
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isImporting}
+                      >
+                        {isImporting ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            রিস্টোর হচ্ছে...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-4 h-4 mr-2" />
+                            JSON ফাইল আপলোড করুন
+                          </>
+                        )}
+                      </Button>
+                      <p className="text-xs text-muted-foreground text-center">
+                        শুধুমাত্র JSON ফরম্যাট রিস্টোর সাপোর্টেড
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Google Drive Tab */}
+              <TabsContent value="gdrive" className="space-y-6">
+                <Card className="glass-card">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Settings className="w-5 h-5" />
+                      Google Drive কনফিগারেশন
+                    </CardTitle>
+                    <CardDescription>
+                      অটোমেটিক ব্যাকআপের জন্য Google Cloud Console থেকে API কী সেটআপ করুন
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Setup Instructions */}
+                    <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value="setup">
+                        <AccordionTrigger className="text-primary">
+                          📖 Google Drive API সেটআপ গাইড
+                        </AccordionTrigger>
+                        <AccordionContent className="space-y-4 text-sm">
+                          <div className="space-y-3 p-4 bg-muted/50 rounded-lg">
+                            <h4 className="font-semibold">ধাপ ১: Google Cloud Console এ প্রজেক্ট তৈরি</h4>
+                            <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
+                              <li>
+                                <a
+                                  href="https://console.cloud.google.com/"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-primary hover:underline inline-flex items-center gap-1"
+                                >
+                                  Google Cloud Console <ExternalLink className="w-3 h-3" />
+                                </a>
+                                {" "}এ যান
+                              </li>
+                              <li>নতুন প্রজেক্ট তৈরি করুন বা বিদ্যমান প্রজেক্ট সিলেক্ট করুন</li>
+                              <li>"APIs & Services" → "Library" এ যান</li>
+                              <li>"Google Drive API" সার্চ করে Enable করুন</li>
+                            </ol>
+                          </div>
+
+                          <div className="space-y-3 p-4 bg-muted/50 rounded-lg">
+                            <h4 className="font-semibold">ধাপ ২: OAuth Credentials তৈরি</h4>
+                            <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
+                              <li>"APIs & Services" → "Credentials" এ যান</li>
+                              <li>"Create Credentials" → "OAuth client ID" সিলেক্ট করুন</li>
+                              <li>Application type: "Web application" সিলেক্ট করুন</li>
+                              <li>Authorized JavaScript origins এ আপনার সাইটের URL দিন</li>
+                              <li>Client ID কপি করুন</li>
+                            </ol>
+                          </div>
+
+                          <div className="space-y-3 p-4 bg-muted/50 rounded-lg">
+                            <h4 className="font-semibold">ধাপ ৩: API Key তৈরি</h4>
+                            <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
+                              <li>"Create Credentials" → "API key" সিলেক্ট করুন</li>
+                              <li>API key কপি করুন</li>
+                              <li>"Edit API key" → "Application restrictions" এ HTTP referrers সেট করুন</li>
+                              <li>"API restrictions" এ Google Drive API সিলেক্ট করুন</li>
+                            </ol>
+                          </div>
+
+                          <div className="space-y-3 p-4 bg-info/10 border border-info/30 rounded-lg">
+                            <h4 className="font-semibold text-info">💡 টিপস</h4>
+                            <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                              <li>ফোল্ডার ID পেতে Google Drive এ ফোল্ডার খুলুন, URL এর শেষ অংশ হল ID</li>
+                              <li>OAuth consent screen সেটআপ করতে ভুলবেন না</li>
+                              <li>টেস্ট মোডে আপনার ইমেইল টেস্ট ইউজার হিসেবে যোগ করুন</li>
+                            </ul>
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+
+                    {/* Configuration Form */}
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label className="flex items-center gap-2">
+                          <Key className="w-4 h-4" />
+                          Client ID
+                        </Label>
+                        <Input
+                          placeholder="xxxxx.apps.googleusercontent.com"
+                          value={driveClientId}
+                          onChange={(e) => setDriveClientId(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="flex items-center gap-2">
+                          <Key className="w-4 h-4" />
+                          API Key
+                        </Label>
+                        <Input
+                          placeholder="AIzaSy..."
+                          value={driveApiKey}
+                          onChange={(e) => setDriveApiKey(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="flex items-center gap-2">
+                          <FolderOpen className="w-4 h-4" />
+                          Folder ID (ঐচ্ছিক)
+                        </Label>
+                        <Input
+                          placeholder="1abc2def3ghi..."
+                          value={driveFolderId}
+                          onChange={(e) => setDriveFolderId(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="flex items-center gap-2">
+                          <Timer className="w-4 h-4" />
+                          অটো ব্যাকআপ ইন্টারভাল
+                        </Label>
+                        <Select
+                          value={autoBackupInterval}
+                          onValueChange={(v: any) => setAutoBackupInterval(v)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="daily">প্রতিদিন</SelectItem>
+                            <SelectItem value="weekly">প্রতি সপ্তাহে</SelectItem>
+                            <SelectItem value="monthly">প্রতি মাসে</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
+                      <div className="space-y-1">
+                        <Label>অটোমেটিক ব্যাকআপ</Label>
+                        <p className="text-xs text-muted-foreground">
+                          নির্ধারিত সময়ে স্বয়ংক্রিয়ভাবে Google Drive এ ব্যাকআপ হবে
+                        </p>
+                      </div>
+                      <Switch checked={autoBackup} onCheckedChange={setAutoBackup} />
+                    </div>
+
+                    <div className="flex gap-3">
+                      <Button
+                        variant="outline"
+                        className="flex-1"
+                        onClick={handleSaveGoogleDriveConfig}
+                      >
+                        <Save className="w-4 h-4 mr-2" />
+                        সেটিংস সংরক্ষণ করুন
+                      </Button>
+                      <Button
+                        className="flex-1 gradient-gold text-primary-foreground"
+                        onClick={() => uploadToGoogleDrive(exportFormat)}
+                        disabled={isUploadingToDrive || !driveClientId || !driveApiKey}
+                      >
+                        {isUploadingToDrive ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            আপলোড হচ্ছে...
+                          </>
+                        ) : (
+                          <>
+                            <Cloud className="w-4 h-4 mr-2" />
+                            Google Drive এ আপলোড
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
 
             {/* Backup History */}
             <Card className="glass-card">
@@ -223,6 +518,7 @@ const Backup = () => {
                         <TableHead>নাম</TableHead>
                         <TableHead>তারিখ</TableHead>
                         <TableHead>সাইজ</TableHead>
+                        <TableHead>ফরম্যাট</TableHead>
                         <TableHead>উৎস</TableHead>
                         <TableHead className="text-right">অ্যাকশন</TableHead>
                       </TableRow>
@@ -232,7 +528,11 @@ const Backup = () => {
                         <TableRow key={backup.id}>
                           <TableCell className="font-medium">
                             <div className="flex items-center gap-2">
-                              <FileJson className="w-4 h-4 text-primary" />
+                              {backup.format === "sql" ? (
+                                <FileCode className="w-4 h-4 text-primary" />
+                              ) : (
+                                <FileJson className="w-4 h-4 text-info" />
+                              )}
                               {backup.name}
                             </div>
                           </TableCell>
@@ -243,38 +543,56 @@ const Backup = () => {
                           </TableCell>
                           <TableCell>{backup.size}</TableCell>
                           <TableCell>
-                            <Badge variant="outline" className="gap-1">
-                              <HardDrive className="w-3 h-3" />
-                              লোকাল
+                            <Badge variant="outline">
+                              {backup.format?.toUpperCase() || "JSON"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="outline"
+                              className={`gap-1 ${backup.type === "google_drive" ? "text-info" : ""}`}
+                            >
+                              {backup.type === "google_drive" ? (
+                                <>
+                                  <Cloud className="w-3 h-3" />
+                                  Drive
+                                </>
+                              ) : (
+                                <>
+                                  <HardDrive className="w-3 h-3" />
+                                  লোকাল
+                                </>
+                              )}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-1">
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                                    <RotateCcw className="w-4 h-4" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>রিস্টোর নিশ্চিত করুন</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      এই ব্যাকআপ রিস্টোর করলে বর্তমান সমস্ত ডাটা মুছে যাবে এবং ব্যাকআপের ডাটা দিয়ে প্রতিস্থাপিত হবে।
-                                      এই প্রক্রিয়া অপরিবর্তনীয়।
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>বাতিল</AlertDialogCancel>
-                                    <AlertDialogAction
-                                      onClick={() => handleRestore(backup.id)}
-                                      className="bg-primary"
-                                    >
-                                      রিস্টোর করুন
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
+                              {backup.type === "local" && backup.format !== "sql" && (
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                                      <RotateCcw className="w-4 h-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>রিস্টোর নিশ্চিত করুন</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        এই ব্যাকআপ রিস্টোর করলে বর্তমান সমস্ত ডাটা মুছে যাবে এবং ব্যাকআপের ডাটা দিয়ে প্রতিস্থাপিত হবে।
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>বাতিল</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={() => handleRestore(backup.id)}
+                                        className="bg-primary"
+                                      >
+                                        রিস্টোর করুন
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              )}
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                   <Button
@@ -289,7 +607,7 @@ const Backup = () => {
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>ব্যাকআপ মুছে ফেলুন</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                      এই ব্যাকআপটি স্থায়ীভাবে মুছে যাবে। এই প্রক্রিয়া অপরিবর্তনীয়।
+                                      এই ব্যাকআপটি স্থায়ীভাবে মুছে যাবে।
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
@@ -320,9 +638,10 @@ const Backup = () => {
                 <div className="text-sm">
                   <p className="font-medium text-foreground mb-1">ব্যাকআপ সম্পর্কে</p>
                   <ul className="text-muted-foreground space-y-1">
-                    <li>• ব্যাকআপে মামলা, মক্কেল, চেক এবং টাইমলাইন ডাটা থাকে</li>
+                    <li>• ব্যাকআপে সমস্ত ১০টি ডাটাবেস টেবিলের ডাটা থাকে</li>
+                    <li>• SQL ফরম্যাট সরাসরি PostgreSQL এ ইম্পোর্ট করা যায়</li>
+                    <li>• JSON ফরম্যাট এই অ্যাপ থেকে রিস্টোর করা যায়</li>
                     <li>• লোকাল স্টোরেজে সর্বোচ্চ ১০টি ব্যাকআপ সংরক্ষিত থাকে</li>
-                    <li>• JSON ফাইল ডাউনলোড করে নিরাপদ স্থানে রাখুন</li>
                     <li>• রিস্টোর করার আগে বর্তমান ডাটার ব্যাকআপ নিন</li>
                   </ul>
                 </div>
