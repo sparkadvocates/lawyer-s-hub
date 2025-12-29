@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Search, Plus, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -19,11 +20,19 @@ import NotificationBell from "./NotificationBell";
 const Header = () => {
   const navigate = useNavigate();
   const { user, signOut, role } = useAuth();
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleSignOut = async () => {
     await signOut();
     toast.success("Signed out successfully");
     navigate("/login");
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/dashboard/cases?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
   };
 
   const getUserInitials = () => {
@@ -40,13 +49,15 @@ const Header = () => {
   return (
     <header className="h-16 border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50 px-6 flex items-center justify-between">
       {/* Search */}
-      <div className="relative w-96 hidden md:block">
+      <form onSubmit={handleSearch} className="relative w-96 hidden md:block">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           placeholder="Search cases, clients, documents..."
-          className="pl-10 bg-secondary/50 border-transparent focus:border-primary"
+          className="pl-10 bg-secondary/50 border-transparent focus:border-primary cursor-text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
-      </div>
+      </form>
 
       {/* Right Section */}
       <div className="flex items-center gap-4 ml-auto">
@@ -80,7 +91,7 @@ const Header = () => {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate("/dashboard/admin/settings")}>Profile Settings</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/dashboard/settings")}>Profile Settings</DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/dashboard/billing")}>Billing</DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/dashboard/clients")}>Team</DropdownMenuItem>
             <DropdownMenuSeparator />
