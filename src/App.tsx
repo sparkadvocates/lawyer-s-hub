@@ -17,6 +17,8 @@ import Clients from "./pages/Clients";
 import Documents from "./pages/Documents";
 import CourtDates from "./pages/CourtDates";
 import Checks from "./pages/Checks";
+import Billing from "./pages/Billing";
+import Messages from "./pages/Messages";
 import AdminSettings from "./pages/AdminSettings";
 import AdminReports from "./pages/AdminReports";
 import AdminPackages from "./pages/AdminPackages";
@@ -104,6 +106,22 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Checks />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/billing"
+              element={
+                <ProtectedRoute>
+                  <Billing />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/messages"
+              element={
+                <ProtectedRoute>
+                  <Messages />
                 </ProtectedRoute>
               }
             />
