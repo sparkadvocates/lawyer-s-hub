@@ -261,6 +261,39 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          action_url: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          action_url?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          action_url?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payment_history: {
         Row: {
           amount: number
@@ -418,6 +451,7 @@ export type Database = {
           payment_method: string | null
           payment_reference: string | null
           plan_id: string | null
+          renewal_reminder_sent: boolean | null
           start_date: string
           status: string
           updated_at: string
@@ -433,6 +467,7 @@ export type Database = {
           payment_method?: string | null
           payment_reference?: string | null
           plan_id?: string | null
+          renewal_reminder_sent?: boolean | null
           start_date?: string
           status?: string
           updated_at?: string
@@ -448,6 +483,7 @@ export type Database = {
           payment_method?: string | null
           payment_reference?: string | null
           plan_id?: string | null
+          renewal_reminder_sent?: boolean | null
           start_date?: string
           status?: string
           updated_at?: string

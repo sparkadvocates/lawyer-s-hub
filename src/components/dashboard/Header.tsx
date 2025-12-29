@@ -1,4 +1,4 @@
-import { Bell, Search, Plus, LogOut } from "lucide-react";
+import { Search, Plus, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { RoleBadge } from "@/components/RoleBadge";
+import NotificationBell from "./NotificationBell";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -56,36 +57,7 @@ const Header = () => {
         </Button>
 
         {/* Notifications */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
-            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="flex flex-col items-start gap-1 py-3">
-              <span className="font-medium">Court date reminder</span>
-              <span className="text-sm text-muted-foreground">
-                Smith vs. Johnson hearing tomorrow at 9 AM
-              </span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start gap-1 py-3">
-              <span className="font-medium">Document signed</span>
-              <span className="text-sm text-muted-foreground">
-                Client signed the settlement agreement
-              </span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start gap-1 py-3">
-              <span className="font-medium">New message</span>
-              <span className="text-sm text-muted-foreground">
-                2 unread messages from clients
-              </span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <NotificationBell />
 
         {/* Profile */}
         <DropdownMenu>
