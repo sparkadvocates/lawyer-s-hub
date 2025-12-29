@@ -75,16 +75,28 @@ const AdminSettings = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const { data: sessionData } = await supabase.auth.getSession();
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !sessionData.session?.access_token) {
+        console.error("No valid session found:", sessionError);
+        toast.error("Session expired. Please login again.");
+        navigate("/admin/login");
+        return;
+      }
       
       const response = await supabase.functions.invoke("admin-get-users", {
         headers: {
-          Authorization: `Bearer ${sessionData.session?.access_token}`,
+          Authorization: `Bearer ${sessionData.session.access_token}`,
         },
       });
 
       if (response.error) {
+        console.error("Edge function error:", response.error);
         throw new Error(response.error.message || "Failed to fetch users");
+      }
+
+      if (response.data?.error) {
+        throw new Error(response.data.error);
       }
 
       setUsers(response.data.users || []);
