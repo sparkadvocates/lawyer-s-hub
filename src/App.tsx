@@ -24,6 +24,7 @@ import Search from "./pages/Search";
 import AdminSettings from "./pages/AdminSettings";
 import AdminReports from "./pages/AdminReports";
 import AdminPackages from "./pages/AdminPackages";
+import MoreMenu from "./pages/MoreMenu";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -164,6 +165,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <AdminPackages />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/more"
+              element={
+                <ProtectedRoute>
+                  <MoreMenu />
                 </ProtectedRoute>
               }
             />
