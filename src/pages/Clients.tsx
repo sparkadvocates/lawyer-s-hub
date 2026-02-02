@@ -145,7 +145,7 @@ const Clients = () => {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
@@ -228,24 +228,24 @@ const Clients = () => {
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <Header />
-        <main className="flex-1 p-6 overflow-auto">
-          <div className="max-w-7xl mx-auto space-y-6">
+        <main className="flex-1 p-3 sm:p-6 overflow-auto">
+          <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
             {/* Page Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
               <div>
-                <h1 className="text-3xl font-display font-bold text-foreground">Clients</h1>
-                <p className="text-muted-foreground mt-1">Manage your client information</p>
+                <h1 className="text-2xl sm:text-3xl font-display font-bold text-foreground">Clients</h1>
+                <p className="text-sm sm:text-base text-muted-foreground mt-1">Manage your client information</p>
               </div>
               <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                 <DialogTrigger asChild>
-                  <Button className="gradient-gold text-primary-foreground shadow-gold">
+                  <Button className="gradient-gold text-primary-foreground shadow-gold w-full sm:w-auto">
                     <Plus className="w-4 h-4 mr-2" />
                     Add Client
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="bg-card border-border max-w-md">
                   <DialogHeader>
-                    <DialogTitle className="font-display text-xl">Add New Client</DialogTitle>
+                    <DialogTitle className="font-display text-lg sm:text-xl">Add New Client</DialogTitle>
                   </DialogHeader>
                   <ClientForm />
                 </DialogContent>
@@ -253,65 +253,65 @@ const Clients = () => {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="glass-card p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/20">
-                    <Users className="w-5 h-5 text-primary" />
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="glass-card p-3 sm:p-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-primary/20">
+                    <Users className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-foreground">{clients.length}</p>
-                    <p className="text-sm text-muted-foreground">Total Clients</p>
+                    <p className="text-xl sm:text-2xl font-bold text-foreground">{clients.length}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Total</p>
                   </div>
                 </div>
               </div>
-              <div className="glass-card p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-success/20">
-                    <Building className="w-5 h-5 text-success" />
+              <div className="glass-card p-3 sm:p-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-success/20">
+                    <Building className="w-4 h-4 sm:w-5 sm:h-5 text-success" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-foreground">
+                    <p className="text-xl sm:text-2xl font-bold text-foreground">
                       {clients.filter((c) => c.company).length}
                     </p>
-                    <p className="text-sm text-muted-foreground">Corporate</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Corporate</p>
                   </div>
                 </div>
               </div>
-              <div className="glass-card p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-info/20">
-                    <Mail className="w-5 h-5 text-info" />
+              <div className="glass-card p-3 sm:p-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-info/20">
+                    <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-info" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-foreground">
+                    <p className="text-xl sm:text-2xl font-bold text-foreground">
                       {clients.filter((c) => c.email).length}
                     </p>
-                    <p className="text-sm text-muted-foreground">With Email</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">With Email</p>
                   </div>
                 </div>
               </div>
-              <div className="glass-card p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-warning/20">
-                    <Phone className="w-5 h-5 text-warning" />
+              <div className="glass-card p-3 sm:p-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-warning/20">
+                    <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-warning" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-foreground">
+                    <p className="text-xl sm:text-2xl font-bold text-foreground">
                       {clients.filter((c) => c.phone).length}
                     </p>
-                    <p className="text-sm text-muted-foreground">With Phone</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">With Phone</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Search */}
-            <div className="glass-card p-4">
+            <div className="glass-card p-3 sm:p-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search clients by name, email, or company..."
+                  placeholder="Search clients..."
                   className="pl-10"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -320,7 +320,7 @@ const Clients = () => {
             </div>
 
             {/* Clients Table */}
-            <div className="glass-card">
+            <div className="glass-card overflow-hidden">
               {loading ? (
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -329,92 +329,99 @@ const Clients = () => {
                 <div className="text-center py-12">
                   <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                   <h3 className="text-lg font-medium text-foreground mb-1">No clients found</h3>
-                  <p className="text-muted-foreground">Add your first client to get started</p>
+                  <p className="text-muted-foreground text-sm">Add your first client to get started</p>
                 </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Client</TableHead>
-                      <TableHead>Contact</TableHead>
-                      <TableHead>Company</TableHead>
-                      <TableHead>Address</TableHead>
-                      <TableHead>Added</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredClients.map((client) => (
-                      <TableRow key={client.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar className="w-9 h-9">
-                              <AvatarFallback className="bg-primary/20 text-primary">
-                                {client.name
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")
-                                  .slice(0, 2)
-                                  .toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span className="font-medium">{client.name}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            {client.email && (
-                              <div className="flex items-center gap-1 text-sm">
-                                <Mail className="w-3 h-3 text-muted-foreground" />
-                                {client.email}
-                              </div>
-                            )}
-                            {client.phone && (
-                              <div className="flex items-center gap-1 text-sm">
-                                <Phone className="w-3 h-3 text-muted-foreground" />
-                                {client.phone}
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>{client.company || "-"}</TableCell>
-                        <TableCell className="max-w-[200px] truncate">
-                          {client.address || "-"}
-                        </TableCell>
-                        <TableCell>
-                          {format(new Date(client.created_at), "MMM d, yyyy")}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreVertical className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => openViewDialog(client)}>
-                                <Eye className="w-4 h-4 mr-2" />
-                                View Details
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => openEditDialog(client)}>
-                                <Edit className="w-4 h-4 mr-2" />
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                className="text-destructive"
-                                onClick={() => handleDeleteClient(client.id)}
-                              >
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Client</TableHead>
+                        <TableHead className="hidden sm:table-cell">Contact</TableHead>
+                        <TableHead className="hidden md:table-cell">Company</TableHead>
+                        <TableHead className="hidden lg:table-cell">Address</TableHead>
+                        <TableHead className="hidden sm:table-cell">Added</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredClients.map((client) => (
+                        <TableRow key={client.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-2 sm:gap-3">
+                              <Avatar className="w-8 h-8 sm:w-9 sm:h-9">
+                                <AvatarFallback className="bg-primary/20 text-primary text-xs sm:text-sm">
+                                  {client.name
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .join("")
+                                    .slice(0, 2)
+                                    .toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <span className="font-medium text-sm sm:text-base">{client.name}</span>
+                                <div className="sm:hidden text-xs text-muted-foreground">
+                                  {client.email || client.phone || "No contact"}
+                                </div>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden sm:table-cell">
+                            <div className="space-y-1">
+                              {client.email && (
+                                <div className="flex items-center gap-1 text-sm">
+                                  <Mail className="w-3 h-3 text-muted-foreground" />
+                                  <span className="truncate max-w-[150px]">{client.email}</span>
+                                </div>
+                              )}
+                              {client.phone && (
+                                <div className="flex items-center gap-1 text-sm">
+                                  <Phone className="w-3 h-3 text-muted-foreground" />
+                                  {client.phone}
+                                </div>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">{client.company || "-"}</TableCell>
+                          <TableCell className="hidden lg:table-cell max-w-[200px] truncate">
+                            {client.address || "-"}
+                          </TableCell>
+                          <TableCell className="hidden sm:table-cell">
+                            {format(new Date(client.created_at), "MMM d, yyyy")}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreVertical className="w-4 h-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => openViewDialog(client)}>
+                                  <Eye className="w-4 h-4 mr-2" />
+                                  View Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => openEditDialog(client)}>
+                                  <Edit className="w-4 h-4 mr-2" />
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  className="text-destructive"
+                                  onClick={() => handleDeleteClient(client.id)}
+                                >
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
             </div>
           </div>
