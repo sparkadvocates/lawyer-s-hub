@@ -385,7 +385,7 @@ const AdminPackages = () => {
     return (
       <div className="flex h-screen bg-background">
         <Sidebar />
-        <main className="flex-1 flex flex-col overflow-hidden">
+        <main className="flex-1 min-w-0 flex flex-col overflow-hidden pl-16 md:pl-0">
           <Header />
           <div className="flex-1 flex items-center justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -400,7 +400,7 @@ const AdminPackages = () => {
   return (
     <div className="flex h-screen bg-background">
       <Sidebar />
-      <main className="flex-1 flex flex-col overflow-hidden ml-16 md:ml-0">
+      <main className="flex-1 min-w-0 flex flex-col overflow-hidden pl-16 md:pl-0">
         <Header />
         <div className="flex-1 overflow-auto p-3 sm:p-6 space-y-6">
           {/* Page Header */}
