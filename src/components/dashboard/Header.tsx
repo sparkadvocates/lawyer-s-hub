@@ -48,9 +48,12 @@ const Header = () => {
   };
 
   return (
-    <header className="h-16 border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50 px-6 flex items-center justify-between">
+    <header className="h-14 sm:h-16 border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-40 px-4 sm:px-6 flex items-center justify-between">
+      {/* Spacer for mobile menu button */}
+      <div className="w-10 md:hidden" />
+      
       {/* Search */}
-      <form onSubmit={handleSearch} className="relative w-96 hidden md:block">
+      <form onSubmit={handleSearch} className="relative w-full max-w-md hidden sm:block">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           placeholder="Search cases, clients, documents..."
@@ -61,11 +64,11 @@ const Header = () => {
       </form>
 
       {/* Right Section */}
-      <div className="flex items-center gap-4 ml-auto">
+      <div className="flex items-center gap-2 sm:gap-4 ml-auto">
         {/* Quick Actions */}
         <Button variant="gold" size="sm" className="hidden sm:flex" onClick={() => navigate("/dashboard/cases")}>
-          <Plus className="w-4 h-4" />
-          New Case
+          <Plus className="w-4 h-4 sm:mr-1" />
+          <span className="hidden md:inline">New Case</span>
         </Button>
 
         {/* Notifications */}
@@ -74,9 +77,9 @@ const Header = () => {
         {/* Profile */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-3 px-2">
-              <Avatar className="w-8 h-8">
-                <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
+            <Button variant="ghost" className="flex items-center gap-2 sm:gap-3 px-1.5 sm:px-2">
+              <Avatar className="w-7 h-7 sm:w-8 sm:h-8">
+                <AvatarFallback className="bg-primary text-primary-foreground text-xs sm:text-sm font-semibold">
                   {getUserInitials()}
                 </AvatarFallback>
               </Avatar>

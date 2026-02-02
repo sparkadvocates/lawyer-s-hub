@@ -156,16 +156,16 @@ const Checks = () => {
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <Header />
-        <main className="flex-1 p-6 overflow-auto">
-          <div className="max-w-7xl mx-auto space-y-6">
-            <div className="flex items-center justify-between">
+        <main className="flex-1 p-3 sm:p-6 overflow-auto">
+          <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
               <div>
-                <h1 className="text-3xl font-display font-bold text-foreground">Cheque ম্যানেজমেন্ট</h1>
-                <p className="text-muted-foreground mt-1">চেক ডিস অনার ও লিগ্যাল নোটিশ ট্র্যাকিং</p>
+                <h1 className="text-2xl sm:text-3xl font-display font-bold text-foreground">Cheque ম্যানেজমেন্ট</h1>
+                <p className="text-sm sm:text-base text-muted-foreground mt-1">চেক ডিস অনার ও লিগ্যাল নোটিশ ট্র্যাকিং</p>
               </div>
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button onClick={() => handleOpenDialog()} className="gap-2">
+                  <Button onClick={() => handleOpenDialog()} className="gap-2 w-full sm:w-auto">
                     <Plus className="w-4 h-4" />নতুন চেক
                   </Button>
                 </DialogTrigger>
@@ -175,7 +175,7 @@ const Checks = () => {
                     <DialogDescription>চেকের বিস্তারিত তথ্য প্রদান করুন</DialogDescription>
                   </DialogHeader>
                   <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>চেক নম্বর *</Label>
                         <Input value={formData.check_number} onChange={(e) => setFormData({ ...formData, check_number: e.target.value })} required />
@@ -185,7 +185,7 @@ const Checks = () => {
                         <Input value={formData.bank_name} onChange={(e) => setFormData({ ...formData, bank_name: e.target.value })} required />
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>চেকের তারিখ *</Label>
                         <Input type="date" value={formData.check_date} onChange={(e) => setFormData({ ...formData, check_date: e.target.value })} required />
@@ -195,7 +195,7 @@ const Checks = () => {
                         <Input type="number" value={formData.check_amount || ''} onChange={(e) => setFormData({ ...formData, check_amount: e.target.value ? parseFloat(e.target.value) : null })} />
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>মক্কেল</Label>
                         <Select value={formData.client_id || 'none'} onValueChange={(v) => setFormData({ ...formData, client_id: v === 'none' ? null : v })}>
@@ -217,7 +217,7 @@ const Checks = () => {
                         </Select>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>ডিস অনার তারিখ</Label>
                         <Input type="date" value={formData.dishonor_date || ''} onChange={(e) => setFormData({ ...formData, dishonor_date: e.target.value || null })} />
@@ -227,7 +227,7 @@ const Checks = () => {
                         <Input type="date" value={formData.legal_notice_date || ''} onChange={(e) => setFormData({ ...formData, legal_notice_date: e.target.value || null })} />
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>নোটিশের অবস্থা</Label>
                         <Select value={formData.notice_status} onValueChange={(v) => setFormData({ ...formData, notice_status: v as NoticeStatus })}>
@@ -246,9 +246,9 @@ const Checks = () => {
                       <Label>নোট</Label>
                       <Textarea value={formData.notes || ''} onChange={(e) => setFormData({ ...formData, notes: e.target.value || null })} rows={2} />
                     </div>
-                    <div className="flex justify-end gap-3 pt-4">
-                      <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>বাতিল</Button>
-                      <Button type="submit">{editingCheck ? 'আপডেট' : 'যোগ করুন'}</Button>
+                    <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+                      <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="w-full sm:w-auto">বাতিল</Button>
+                      <Button type="submit" className="w-full sm:w-auto">{editingCheck ? 'আপডেট' : 'যোগ করুন'}</Button>
                     </div>
                   </form>
                 </DialogContent>
@@ -258,10 +258,10 @@ const Checks = () => {
             <CheckStats checks={checks} alerts={alerts} />
 
             <Tabs defaultValue="list" className="space-y-4">
-              <TabsList>
-                <TabsTrigger value="list">চেক তালিকা</TabsTrigger>
-                <TabsTrigger value="alerts">অ্যালার্ট ({alerts.length})</TabsTrigger>
-                <TabsTrigger value="reports">রিপোর্ট</TabsTrigger>
+              <TabsList className="w-full sm:w-auto flex">
+                <TabsTrigger value="list" className="flex-1 sm:flex-none text-xs sm:text-sm">চেক তালিকা</TabsTrigger>
+                <TabsTrigger value="alerts" className="flex-1 sm:flex-none text-xs sm:text-sm">অ্যালার্ট ({alerts.length})</TabsTrigger>
+                <TabsTrigger value="reports" className="flex-1 sm:flex-none text-xs sm:text-sm">রিপোর্ট</TabsTrigger>
               </TabsList>
 
               <TabsContent value="list" className="space-y-4">
@@ -274,18 +274,20 @@ const Checks = () => {
                   bankFilter={bankFilter} setBankFilter={setBankFilter}
                   banks={banks} onClearFilters={clearFilters}
                 />
-                <Card className="glass-card">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><FileCheck className="w-5 h-5" />চেক তালিকা</CardTitle>
-                    <CardDescription>মোট {filteredChecks.length}টি চেক</CardDescription>
+                <Card className="glass-card overflow-hidden">
+                  <CardHeader className="p-4 sm:p-6">
+                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg"><FileCheck className="w-4 h-4 sm:w-5 sm:h-5" />চেক তালিকা</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">মোট {filteredChecks.length}টি চেক</CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    {loading ? <div className="text-center py-8">লোড হচ্ছে...</div> : (
-                      <CheckTable
-                        checks={filteredChecks} alerts={alerts}
-                        onEdit={handleOpenDialog} onDelete={handleDelete}
-                        onView={setViewingCheck} highlightedCheckId={highlightedCheckId}
-                      />
+                  <CardContent className="p-0 sm:p-6 sm:pt-0">
+                    {loading ? <div className="text-center py-8 text-sm">লোড হচ্ছে...</div> : (
+                      <div className="overflow-x-auto">
+                        <CheckTable
+                          checks={filteredChecks} alerts={alerts}
+                          onEdit={handleOpenDialog} onDelete={handleDelete}
+                          onView={setViewingCheck} highlightedCheckId={highlightedCheckId}
+                        />
+                      </div>
                     )}
                   </CardContent>
                 </Card>

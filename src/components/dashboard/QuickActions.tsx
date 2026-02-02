@@ -22,18 +22,18 @@ const QuickActions = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="glass-card p-6">
-      <h3 className="font-display text-lg font-semibold mb-4">Quick Actions</h3>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+    <div className="glass-card p-4 sm:p-6 h-full">
+      <h3 className="font-display text-base sm:text-lg font-semibold mb-3 sm:mb-4">Quick Actions</h3>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
         {actions.map((action, index) => (
           <Button
             key={action.label}
             variant="outline"
-            className={`h-auto py-4 flex-col gap-2 hover:bg-secondary animate-fade-in stagger-${index + 1}`}
+            className={`h-auto py-3 sm:py-4 flex-col gap-1.5 sm:gap-2 hover:bg-secondary animate-fade-in stagger-${index + 1}`}
             onClick={() => navigate(action.path)}
           >
-            <action.icon className={`w-5 h-5 ${action.color}`} />
-            <span className="text-xs">{action.label}</span>
+            <action.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${action.color}`} />
+            <span className="text-[10px] sm:text-xs">{action.label}</span>
           </Button>
         ))}
       </div>

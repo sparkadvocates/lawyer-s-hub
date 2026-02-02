@@ -142,34 +142,34 @@ const AdminLogin = () => {
       </div>
 
       {/* Right Panel - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-8 lg:p-12">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-8 lg:p-12">
         <div className="w-full max-w-md animate-fade-in">
           {/* Mobile Logo */}
-          <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
-            <div className="p-3 rounded-xl bg-destructive">
-              <ShieldCheck className="w-8 h-8 text-destructive-foreground" />
+          <div className="lg:hidden flex items-center gap-2 sm:gap-3 mb-6 sm:mb-8 justify-center">
+            <div className="p-2 sm:p-3 rounded-xl bg-destructive">
+              <ShieldCheck className="w-6 h-6 sm:w-8 sm:h-8 text-destructive-foreground" />
             </div>
-            <h1 className="font-display text-3xl font-bold">
+            <h1 className="font-display text-2xl sm:text-3xl font-bold">
               Admin <span className="text-destructive">Portal</span>
             </h1>
           </div>
 
-          <div className="text-center lg:text-left mb-8">
-            <h2 className="font-display text-3xl font-bold text-foreground mb-2">
+          <div className="text-center lg:text-left mb-6 sm:mb-8">
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-2">
               Admin Login
             </h2>
-            <p className="text-muted-foreground">
+            <p className="text-sm sm:text-base text-muted-foreground">
               Sign in with your administrator credentials
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-foreground">
+              <Label htmlFor="email" className="text-foreground text-sm">
                 Admin Email
               </Label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Mail className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
@@ -179,12 +179,12 @@ const AdminLogin = () => {
                     setEmail(e.target.value);
                     if (errors.email) setErrors({ ...errors, email: undefined });
                   }}
-                  className={`pl-12 ${errors.email ? 'border-destructive' : ''}`}
+                  className={`pl-10 sm:pl-12 ${errors.email ? 'border-destructive' : ''}`}
                   required
                 />
               </div>
               {errors.email && (
-                <p className="text-sm text-destructive flex items-center gap-1">
+                <p className="text-xs sm:text-sm text-destructive flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" />
                   {errors.email}
                 </p>
@@ -192,11 +192,11 @@ const AdminLogin = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-foreground">
+              <Label htmlFor="password" className="text-foreground text-sm">
                 Password
               </Label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Lock className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -206,19 +206,19 @@ const AdminLogin = () => {
                     setPassword(e.target.value);
                     if (errors.password) setErrors({ ...errors, password: undefined });
                   }}
-                  className={`pl-12 pr-12 ${errors.password ? 'border-destructive' : ''}`}
+                  className={`pl-10 sm:pl-12 pr-10 sm:pr-12 ${errors.password ? 'border-destructive' : ''}`}
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
                 </button>
               </div>
               {errors.password && (
-                <p className="text-sm text-destructive flex items-center gap-1">
+                <p className="text-xs sm:text-sm text-destructive flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" />
                   {errors.password}
                 </p>
@@ -238,15 +238,15 @@ const AdminLogin = () => {
                 </span>
               ) : (
                 <>
-                  <ShieldCheck className="w-5 h-5 mr-2" />
+                  <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                   Admin Sign In
                 </>
               )}
             </Button>
           </form>
 
-          <div className="mt-8 text-center">
-            <p className="text-muted-foreground text-sm">
+          <div className="mt-6 sm:mt-8 text-center">
+            <p className="text-muted-foreground text-xs sm:text-sm">
               Not an admin?{" "}
               <Link to="/login" className="text-primary hover:underline font-medium">
                 User Login
@@ -254,7 +254,7 @@ const AdminLogin = () => {
             </p>
           </div>
 
-          <div className="mt-8 pt-8 border-t border-border">
+          <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-border">
             <p className="text-center text-xs text-muted-foreground">
               Admin access is restricted to authorized personnel only.
             </p>

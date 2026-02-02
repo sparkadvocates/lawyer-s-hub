@@ -212,7 +212,7 @@ const Cases = () => {
 
   const CaseForm = ({ isEdit = false }: { isEdit?: boolean }) => (
     <div className="space-y-4 mt-4 max-h-[60vh] overflow-y-auto pr-2">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="title">Case Title *</Label>
           <Input
@@ -239,7 +239,7 @@ const Cases = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Case Type</Label>
           <Select value={formData.case_type || ""} onValueChange={(v) => setFormData({ ...formData, case_type: v })}>
@@ -274,7 +274,7 @@ const Cases = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Status</Label>
           <Select
@@ -305,7 +305,7 @@ const Cases = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="courtName">Court Name</Label>
           <Input
@@ -326,7 +326,7 @@ const Cases = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="opposingParty">Opposing Party</Label>
           <Input
@@ -398,24 +398,24 @@ const Cases = () => {
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <Header />
-        <main className="flex-1 p-6 overflow-auto">
-          <div className="max-w-7xl mx-auto space-y-6">
+        <main className="flex-1 p-3 sm:p-6 overflow-auto">
+          <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
             {/* Page Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
               <div>
-                <h1 className="text-3xl font-display font-bold text-foreground">Cases</h1>
-                <p className="text-muted-foreground mt-1">Manage your legal cases and matters</p>
+                <h1 className="text-2xl sm:text-3xl font-display font-bold text-foreground">Cases</h1>
+                <p className="text-sm sm:text-base text-muted-foreground mt-1">Manage your legal cases and matters</p>
               </div>
               <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                 <DialogTrigger asChild>
-                  <Button className="gradient-gold text-primary-foreground shadow-gold">
+                  <Button className="gradient-gold text-primary-foreground shadow-gold w-full sm:w-auto">
                     <Plus className="w-4 h-4 mr-2" />
                     New Case
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="bg-card border-border max-w-2xl">
+                <DialogContent className="bg-card border-border max-w-2xl max-h-[90vh] overflow-hidden">
                   <DialogHeader>
-                    <DialogTitle className="font-display text-xl">Create New Case</DialogTitle>
+                    <DialogTitle className="font-display text-lg sm:text-xl">Create New Case</DialogTitle>
                   </DialogHeader>
                   <CaseForm />
                 </DialogContent>
@@ -423,57 +423,57 @@ const Cases = () => {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="glass-card p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/20">
-                    <Briefcase className="w-5 h-5 text-primary" />
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="glass-card p-3 sm:p-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-primary/20">
+                    <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-foreground">{stats.total}</p>
-                    <p className="text-sm text-muted-foreground">Total Cases</p>
+                    <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.total}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Total</p>
                   </div>
                 </div>
               </div>
-              <div className="glass-card p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-success/20">
-                    <Clock className="w-5 h-5 text-success" />
+              <div className="glass-card p-3 sm:p-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-success/20">
+                    <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-success" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-foreground">{stats.open}</p>
-                    <p className="text-sm text-muted-foreground">Active</p>
+                    <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.open}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Active</p>
                   </div>
                 </div>
               </div>
-              <div className="glass-card p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-warning/20">
-                    <Calendar className="w-5 h-5 text-warning" />
+              <div className="glass-card p-3 sm:p-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-warning/20">
+                    <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-warning" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-foreground">{stats.pending}</p>
-                    <p className="text-sm text-muted-foreground">Pending</p>
+                    <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.pending}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Pending</p>
                   </div>
                 </div>
               </div>
-              <div className="glass-card p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-muted">
-                    <FileText className="w-5 h-5 text-muted-foreground" />
+              <div className="glass-card p-3 sm:p-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-muted">
+                    <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-foreground">{stats.closed}</p>
-                    <p className="text-sm text-muted-foreground">Closed</p>
+                    <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.closed}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Closed</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Filters */}
-            <div className="glass-card p-4">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="relative flex-1">
+            <div className="glass-card p-3 sm:p-4">
+              <div className="flex flex-col gap-3 sm:gap-4">
+                <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     placeholder="Search cases..."
@@ -482,39 +482,41 @@ const Cases = () => {
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-full md:w-[180px]">
-                    <Filter className="w-4 h-4 mr-2" />
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="open">Open</SelectItem>
-                    <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="closed">Closed</SelectItem>
-                    <SelectItem value="won">Won</SelectItem>
-                    <SelectItem value="lost">Lost</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={typeFilter} onValueChange={setTypeFilter}>
-                  <SelectTrigger className="w-full md:w-[180px]">
-                    <SelectValue placeholder="Case Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    {caseTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                      <Filter className="w-4 h-4 mr-2" />
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="open">Open</SelectItem>
+                      <SelectItem value="in_progress">In Progress</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="closed">Closed</SelectItem>
+                      <SelectItem value="won">Won</SelectItem>
+                      <SelectItem value="lost">Lost</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={typeFilter} onValueChange={setTypeFilter}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                      <SelectValue placeholder="Case Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      {caseTypes.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
 
             {/* Cases Table */}
-            <div className="glass-card">
+            <div className="glass-card overflow-hidden">
               {loading ? (
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="w-8 h-8 animate-spin text-primary" />

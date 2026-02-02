@@ -166,47 +166,47 @@ const Login = () => {
       </div>
 
       {/* Right Panel - Auth Form */}
-      <div className="flex-1 flex items-center justify-center p-8 lg:p-12">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-8 lg:p-12">
         <div className="w-full max-w-md animate-fade-in">
           {/* Mobile Logo */}
-          <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
-            <div className="p-3 rounded-xl gradient-gold shadow-gold">
-              <Scale className="w-8 h-8 text-primary-foreground" />
+          <div className="lg:hidden flex items-center gap-2 sm:gap-3 mb-6 sm:mb-8 justify-center">
+            <div className="p-2 sm:p-3 rounded-xl gradient-gold shadow-gold">
+              <Scale className="w-6 h-6 sm:w-8 sm:h-8 text-primary-foreground" />
             </div>
-            <h1 className="font-display text-3xl font-bold">
+            <h1 className="font-display text-2xl sm:text-3xl font-bold">
               LexPro<span className="text-gradient-gold">Suite</span>
             </h1>
           </div>
 
-          <div className="text-center lg:text-left mb-8">
+          <div className="text-center lg:text-left mb-6 sm:mb-8">
             {mode === "reset" && (
               <button
                 onClick={() => setMode("login")}
-                className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 transition-colors"
+                className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 transition-colors mx-auto lg:mx-0"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back to login
               </button>
             )}
-            <h2 className="font-display text-3xl font-bold text-foreground mb-2">
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-2">
               {mode === "login" && "User Login"}
               {mode === "signup" && "Create Account"}
               {mode === "reset" && "Reset Password"}
             </h2>
-            <p className="text-muted-foreground">
+            <p className="text-sm sm:text-base text-muted-foreground">
               {mode === "login" && "Sign in to access your dashboard"}
               {mode === "signup" && "Start managing your legal practice today"}
               {mode === "reset" && "Enter your email to receive a reset link"}
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-foreground">
+              <Label htmlFor="email" className="text-foreground text-sm">
                 Email Address
               </Label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Mail className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
@@ -216,12 +216,12 @@ const Login = () => {
                     setEmail(e.target.value);
                     if (errors.email) setErrors({ ...errors, email: undefined });
                   }}
-                  className={`pl-12 ${errors.email ? 'border-destructive' : ''}`}
+                  className={`pl-10 sm:pl-12 ${errors.email ? 'border-destructive' : ''}`}
                   required
                 />
               </div>
               {errors.email && (
-                <p className="text-sm text-destructive flex items-center gap-1">
+                <p className="text-xs sm:text-sm text-destructive flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" />
                   {errors.email}
                 </p>
@@ -230,11 +230,11 @@ const Login = () => {
 
             {mode !== "reset" && (
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-foreground">
+                <Label htmlFor="password" className="text-foreground text-sm">
                   Password
                 </Label>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Lock className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
@@ -244,19 +244,19 @@ const Login = () => {
                       setPassword(e.target.value);
                       if (errors.password) setErrors({ ...errors, password: undefined });
                     }}
-                    className={`pl-12 pr-12 ${errors.password ? 'border-destructive' : ''}`}
+                    className={`pl-10 sm:pl-12 pr-10 sm:pr-12 ${errors.password ? 'border-destructive' : ''}`}
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    {showPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="text-sm text-destructive flex items-center gap-1">
+                  <p className="text-xs sm:text-sm text-destructive flex items-center gap-1">
                     <AlertCircle className="w-3 h-3" />
                     {errors.password}
                   </p>
@@ -266,11 +266,11 @@ const Login = () => {
 
             {mode === "signup" && (
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-foreground">
+                <Label htmlFor="confirmPassword" className="text-foreground text-sm">
                   Confirm Password
                 </Label>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Lock className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                   <Input
                     id="confirmPassword"
                     type={showPassword ? "text" : "password"}
@@ -280,12 +280,12 @@ const Login = () => {
                       setConfirmPassword(e.target.value);
                       if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: undefined });
                     }}
-                    className={`pl-12 ${errors.confirmPassword ? 'border-destructive' : ''}`}
+                    className={`pl-10 sm:pl-12 ${errors.confirmPassword ? 'border-destructive' : ''}`}
                     required
                   />
                 </div>
                 {errors.confirmPassword && (
-                  <p className="text-sm text-destructive flex items-center gap-1">
+                  <p className="text-xs sm:text-sm text-destructive flex items-center gap-1">
                     <AlertCircle className="w-3 h-3" />
                     {errors.confirmPassword}
                   </p>
@@ -294,15 +294,15 @@ const Login = () => {
             )}
 
             {mode === "login" && (
-              <div className="flex items-center justify-between text-sm">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-sm">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" className="rounded border-border bg-secondary" />
-                  <span className="text-muted-foreground">Remember me</span>
+                  <span className="text-muted-foreground text-xs sm:text-sm">Remember me</span>
                 </label>
                 <button
                   type="button"
                   onClick={() => setMode("reset")}
-                  className="text-primary hover:underline"
+                  className="text-primary hover:underline text-xs sm:text-sm"
                 >
                   Forgot password?
                 </button>
@@ -333,10 +333,10 @@ const Login = () => {
             </Button>
           </form>
 
-          <div className="mt-8 text-center space-y-3">
+          <div className="mt-6 sm:mt-8 text-center space-y-2 sm:space-y-3">
             {mode === "login" ? (
               <>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-muted-foreground text-xs sm:text-sm">
                   Don't have an account?{" "}
                   <button
                     onClick={() => setMode("signup")}
@@ -345,7 +345,7 @@ const Login = () => {
                     Create one now
                   </button>
                 </p>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-muted-foreground text-xs sm:text-sm">
                   Are you an admin?{" "}
                   <Link to="/admin/login" className="text-destructive hover:underline font-medium">
                     Admin Login
@@ -353,7 +353,7 @@ const Login = () => {
                 </p>
               </>
             ) : mode === "signup" ? (
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground text-xs sm:text-sm">
                 Already have an account?{" "}
                 <button
                   onClick={() => setMode("login")}
@@ -365,7 +365,7 @@ const Login = () => {
             ) : null}
           </div>
 
-          <div className="mt-8 pt-8 border-t border-border">
+          <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-border">
             <p className="text-center text-xs text-muted-foreground">
               Protected by enterprise-grade security. Your data is encrypted and secure.
             </p>
