@@ -226,7 +226,7 @@ const Clients = () => {
   return (
     <div className="min-h-screen bg-background flex">
       <Sidebar />
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col ml-16 md:ml-0">
         <Header />
         <main className="flex-1 p-3 sm:p-6 overflow-auto">
           <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">

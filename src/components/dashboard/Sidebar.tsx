@@ -19,15 +19,18 @@ import {
   CreditCard,
   FileCheck,
   Database,
-  Menu,
-  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
@@ -45,7 +48,7 @@ const menuItems = [
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileExpanded, setMobileExpanded] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut, isAdmin } = useAuth();
@@ -68,159 +71,185 @@ const Sidebar = () => {
   const handleNavClick = (path: string) => {
     navigate(path);
     if (isMobile) {
-      setMobileOpen(false);
+      setMobileExpanded(false);
     }
   };
 
-  const SidebarContent = () => (
-    <div className="flex flex-col h-full">
-      {/* Logo */}
-      <div className="p-4 border-b border-sidebar-border">
-        <Link to="/dashboard" className="flex items-center gap-3" onClick={() => isMobile && setMobileOpen(false)}>
-          <div className="p-2 rounded-xl gradient-gold shadow-gold flex-shrink-0">
-            <Scale className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
-          </div>
-          {(!collapsed || isMobile) && (
-            <span className="font-display text-lg sm:text-xl font-bold text-foreground">
-              LexPro<span className="text-gradient-gold">Suite</span>
-            </span>
-          )}
-        </Link>
-      </div>
+  // Determine if sidebar should show text
+  const showText = isMobile ? mobileExpanded : !collapsed;
+  const sidebarWidth = isMobile 
+    ? (mobileExpanded ? "w-56" : "w-16") 
+    : (collapsed ? "w-20" : "w-64");
 
-      {/* Navigation */}
-      <nav className="flex-1 p-3 sm:p-4 space-y-1 overflow-y-auto">
-        {menuItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          return (
+  return (
+    <TooltipProvider delayDuration={0}>
+      {/* Overlay for mobile when expanded */}
+      {isMobile && mobileExpanded && (
+        <div 
+          className="fixed inset-0 z-30 bg-black/40"
+          onClick={() => setMobileExpanded(false)}
+        />
+      )}
+      
+      <aside
+        className={cn(
+          "h-screen bg-sidebar border-r border-sidebar-border flex flex-col transition-all duration-300 z-40",
+          sidebarWidth,
+          isMobile ? "fixed left-0 top-0" : "sticky top-0"
+        )}
+      >
+        {/* Logo */}
+        <div className={cn(
+          "border-b border-sidebar-border flex items-center",
+          showText ? "p-4" : "p-3 justify-center"
+        )}>
+          <Link 
+            to="/dashboard" 
+            className="flex items-center gap-3"
+            onClick={() => isMobile && setMobileExpanded(false)}
+          >
+            <div className={cn(
+              "rounded-xl gradient-gold shadow-gold flex-shrink-0",
+              showText ? "p-2" : "p-2"
+            )}>
+              <Scale className={cn(
+                "text-primary-foreground",
+                showText ? "w-5 h-5 sm:w-6 sm:h-6" : "w-5 h-5"
+              )} />
+            </div>
+            {showText && (
+              <span className="font-display text-lg sm:text-xl font-bold text-foreground whitespace-nowrap">
+                LexPro<span className="text-gradient-gold">Suite</span>
+              </span>
+            )}
+          </Link>
+        </div>
+
+        {/* Navigation */}
+        <nav className={cn(
+          "flex-1 space-y-1 overflow-y-auto",
+          showText ? "p-3 sm:p-4" : "p-2"
+        )}>
+          {menuItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            const buttonContent = (
+              <button
+                key={item.path}
+                onClick={() => handleNavClick(item.path)}
+                className={cn(
+                  "nav-item w-full",
+                  isActive && "nav-item-active",
+                  showText ? "text-left" : "justify-center px-0"
+                )}
+              >
+                <item.icon className={cn(
+                  "flex-shrink-0",
+                  showText ? "w-5 h-5" : "w-5 h-5",
+                  isActive && "text-primary"
+                )} />
+                {showText && <span className="text-sm truncate">{item.label}</span>}
+              </button>
+            );
+
+            if (!showText) {
+              return (
+                <Tooltip key={item.path}>
+                  <TooltipTrigger asChild>
+                    {buttonContent}
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="z-50">
+                    {item.label}
+                  </TooltipContent>
+                </Tooltip>
+              );
+            }
+
+            return buttonContent;
+          })}
+        </nav>
+
+        {/* Bottom Section */}
+        <div className={cn(
+          "border-t border-sidebar-border space-y-1",
+          showText ? "p-3 sm:p-4" : "p-2"
+        )}>
+          {bottomItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            const buttonContent = (
+              <button
+                key={item.path}
+                onClick={() => handleNavClick(item.path)}
+                className={cn(
+                  "nav-item w-full",
+                  isActive && "nav-item-active",
+                  showText ? "text-left" : "justify-center px-0"
+                )}
+              >
+                <item.icon className="w-5 h-5 flex-shrink-0" />
+                {showText && <span className="text-sm truncate">{item.label}</span>}
+              </button>
+            );
+
+            if (!showText) {
+              return (
+                <Tooltip key={item.path}>
+                  <TooltipTrigger asChild>
+                    {buttonContent}
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="z-50">
+                    {item.label}
+                  </TooltipContent>
+                </Tooltip>
+              );
+            }
+
+            return buttonContent;
+          })}
+
+          {/* Logout */}
+          {!showText ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleLogout}
+                  className="nav-item w-full justify-center px-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                >
+                  <LogOut className="w-5 h-5 flex-shrink-0" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="z-50">
+                Logout
+              </TooltipContent>
+            </Tooltip>
+          ) : (
             <button
-              key={item.path}
-              onClick={() => handleNavClick(item.path)}
-              className={cn(
-                "nav-item w-full text-left",
-                isActive && "nav-item-active",
-                collapsed && !isMobile && "justify-center px-2"
-              )}
-              title={collapsed && !isMobile ? item.label : undefined}
+              onClick={handleLogout}
+              className="nav-item w-full text-left text-destructive hover:text-destructive hover:bg-destructive/10"
             >
-              <item.icon className={cn("w-5 h-5 flex-shrink-0", isActive && "text-primary")} />
-              {(!collapsed || isMobile) && <span className="text-sm sm:text-base">{item.label}</span>}
+              <LogOut className="w-5 h-5 flex-shrink-0" />
+              <span className="text-sm">Logout</span>
             </button>
-          );
-        })}
-      </nav>
-
-      {/* Bottom Section */}
-      <div className="p-3 sm:p-4 border-t border-sidebar-border space-y-1">
-        {bottomItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          return (
-            <button
-              key={item.path}
-              onClick={() => handleNavClick(item.path)}
-              className={cn(
-                "nav-item w-full text-left",
-                isActive && "nav-item-active",
-                collapsed && !isMobile && "justify-center px-2"
-              )}
-              title={collapsed && !isMobile ? item.label : undefined}
-            >
-              <item.icon className="w-5 h-5 flex-shrink-0" />
-              {(!collapsed || isMobile) && <span className="text-sm sm:text-base">{item.label}</span>}
-            </button>
-          );
-        })}
-
-        <button
-          onClick={handleLogout}
-          className={cn(
-            "nav-item w-full text-left text-destructive hover:text-destructive hover:bg-destructive/10",
-            collapsed && !isMobile && "justify-center px-2"
           )}
-          title={collapsed && !isMobile ? "Logout" : undefined}
-        >
-          <LogOut className="w-5 h-5 flex-shrink-0" />
-          {(!collapsed || isMobile) && <span className="text-sm sm:text-base">Logout</span>}
-        </button>
 
-        {/* Collapse Toggle - Desktop only */}
-        {!isMobile && (
+          {/* Toggle Button */}
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setCollapsed(!collapsed)}
-            className={cn("w-full mt-2", collapsed && "px-0")}
+            onClick={() => isMobile ? setMobileExpanded(!mobileExpanded) : setCollapsed(!collapsed)}
+            className={cn("w-full mt-2", !showText && "px-0")}
           >
-            {collapsed ? (
-              <ChevronRight className="w-4 h-4" />
-            ) : (
+            {showText ? (
               <>
                 <ChevronLeft className="w-4 h-4" />
-                <span>Collapse</span>
+                <span className="text-sm">Collapse</span>
               </>
+            ) : (
+              <ChevronRight className="w-4 h-4" />
             )}
           </Button>
-        )}
-      </div>
-    </div>
-  );
-
-  // Mobile: Use Sheet with full width
-  if (isMobile) {
-    return (
-      <>
-        {/* Mobile Menu Button - only show when sidebar is closed */}
-        {!mobileOpen && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setMobileOpen(true)}
-            className="fixed top-3 left-3 z-50 bg-background/80 backdrop-blur-sm shadow-md md:hidden"
-          >
-            <Menu className="w-5 h-5" />
-          </Button>
-        )}
-        
-        {/* Mobile Sidebar Overlay */}
-        {mobileOpen && (
-          <div 
-            className="fixed inset-0 z-40 bg-black/60 md:hidden"
-            onClick={() => setMobileOpen(false)}
-          />
-        )}
-        
-        {/* Mobile Sidebar */}
-        <aside
-          className={cn(
-            "fixed inset-y-0 left-0 z-50 w-[280px] max-w-[85vw] bg-sidebar border-r border-sidebar-border transition-transform duration-300 ease-in-out md:hidden",
-            mobileOpen ? "translate-x-0" : "-translate-x-full"
-          )}
-        >
-          {/* Close Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setMobileOpen(false)}
-            className="absolute top-3 right-3 z-10"
-          >
-            <X className="w-5 h-5" />
-          </Button>
-          <SidebarContent />
-        </aside>
-      </>
-    );
-  }
-
-  // Desktop: Fixed sidebar
-  return (
-    <aside
-      className={cn(
-        "h-screen bg-sidebar border-r border-sidebar-border flex flex-col transition-all duration-300 sticky top-0 hidden md:flex",
-        collapsed ? "w-20" : "w-64"
-      )}
-    >
-      <SidebarContent />
-    </aside>
+        </div>
+      </aside>
+    </TooltipProvider>
   );
 };
 

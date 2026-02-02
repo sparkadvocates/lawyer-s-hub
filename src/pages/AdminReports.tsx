@@ -213,9 +213,9 @@ const AdminReports = () => {
   return (
     <div className="flex h-screen bg-background">
       <Sidebar />
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex-1 flex flex-col overflow-hidden ml-16 md:ml-0">
         <Header />
-        <div className="flex-1 overflow-auto p-6 space-y-6">
+        <div className="flex-1 overflow-auto p-3 sm:p-6 space-y-6">
           {/* Page Header */}
           <div>
             <h1 className="text-3xl font-display font-bold flex items-center gap-3">
