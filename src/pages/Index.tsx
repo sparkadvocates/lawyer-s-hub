@@ -5,23 +5,23 @@ import { Scale, ArrowRight, Shield, Clock, FileText, Users, ShieldCheck, User } 
 const features = [
   {
     icon: Shield,
-    title: "Secure & Compliant",
-    description: "Enterprise-grade security with full regulatory compliance",
+    title: "নিরাপদ ও সম্মত",
+    description: "এন্টারপ্রাইজ-গ্রেড নিরাপত্তা",
   },
   {
     icon: Clock,
-    title: "Time Tracking",
-    description: "Automated billable hours tracking and invoicing",
+    title: "সময় ট্র্যাকিং",
+    description: "স্বয়ংক্রিয় বিলিং ঘন্টা",
   },
   {
     icon: FileText,
-    title: "Document Management",
-    description: "Organize and access all case documents instantly",
+    title: "ডকুমেন্ট ম্যানেজমেন্ট",
+    description: "সকল নথি এক জায়গায়",
   },
   {
     icon: Users,
-    title: "Client Portal",
-    description: "Seamless client communication and collaboration",
+    title: "ক্লায়েন্ট পোর্টাল",
+    description: "সহজ যোগাযোগ ব্যবস্থা",
   },
 ];
 
@@ -31,112 +31,137 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        {/* Background Effects */}
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-primary/5 rounded-full blur-2xl" />
+      <div className="relative overflow-hidden min-h-[100dvh] flex flex-col">
+        {/* Background Effects - Optimized for mobile */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-48 h-48 md:w-96 md:h-96 bg-primary/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 w-32 h-32 md:w-64 md:h-64 bg-primary/5 rounded-full blur-2xl" />
         </div>
 
-        {/* Navigation */}
-        <nav className="relative z-10 container mx-auto px-4 sm:px-6 py-4 sm:py-6 flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="p-1.5 sm:p-2 rounded-xl gradient-gold shadow-gold">
-              <Scale className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
+        {/* Navigation - Touch-friendly */}
+        <nav className="relative z-10 w-full px-4 py-3 flex items-center justify-between safe-area-inset">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-xl gradient-gold shadow-gold">
+              <Scale className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="font-display text-lg sm:text-xl font-bold">
+            <span className="font-display text-lg font-bold">
               LexPro<span className="text-gradient-gold">Suite</span>
             </span>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-4">
-            <Button variant="ghost" size="sm" className="text-xs sm:text-sm px-2 sm:px-4" onClick={() => navigate("/login")}>
-              <User className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">User Login</span>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="rounded-full"
+              onClick={() => navigate("/login")}
+            >
+              <User className="w-5 h-5" />
             </Button>
-            <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-4 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => navigate("/admin/login")}>
-              <ShieldCheck className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Admin Login</span>
+            <Button 
+              variant="outline" 
+              size="icon"
+              className="rounded-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+              onClick={() => navigate("/admin/login")}
+            >
+              <ShieldCheck className="w-5 h-5" />
             </Button>
           </div>
         </nav>
 
-        {/* Hero Content */}
-        <div className="relative z-10 container mx-auto px-4 sm:px-6 py-12 sm:py-24 text-center">
-          <div className="animate-fade-in max-w-4xl mx-auto">
-            <h1 className="font-display text-3xl sm:text-5xl md:text-7xl font-bold text-foreground mb-4 sm:mb-6 leading-tight">
-              Modern Legal Practice
-              <span className="block text-gradient-gold">Management</span>
+        {/* Hero Content - Mobile-first */}
+        <div className="relative z-10 flex-1 flex flex-col justify-center px-4 py-8 text-center">
+          <div className="animate-fade-in max-w-lg mx-auto">
+            <h1 className="font-display text-3xl md:text-5xl lg:text-7xl font-bold text-foreground mb-4 leading-tight">
+              আধুনিক আইনি
+              <span className="block text-gradient-gold">ম্যানেজমেন্ট</span>
             </h1>
 
-            <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 sm:mb-12 leading-relaxed px-2">
-              Streamline your law practice with our comprehensive suite of tools.
-              From case management to billing, everything you need in one place.
+            <p className="text-base md:text-lg text-muted-foreground max-w-md mx-auto mb-8 leading-relaxed px-2">
+              আপনার আইন অনুশীলনকে আধুনিক করুন। কেস ম্যানেজমেন্ট থেকে বিলিং - সব এক জায়গায়।
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+            <div className="flex flex-col gap-3 px-4">
               <Button
                 variant="gold"
                 size="lg"
                 onClick={() => navigate("/login")}
-                className="animate-pulse-glow w-full sm:w-auto"
+                className="w-full animate-pulse-glow text-base"
               >
-                Start Free Trial
+                শুরু করুন
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
-              <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                Watch Demo
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="w-full"
+              >
+                ডেমো দেখুন
               </Button>
             </div>
           </div>
         </div>
+
+        {/* Scroll indicator for mobile */}
+        <div className="relative z-10 pb-6 flex justify-center">
+          <div className="w-6 h-10 border-2 border-muted-foreground/30 rounded-full flex justify-center pt-2">
+            <div className="w-1 h-2 bg-muted-foreground/50 rounded-full animate-bounce" />
+          </div>
+        </div>
       </div>
 
-      {/* Features Section */}
-      <section className="py-12 sm:py-24 relative">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="text-center mb-8 sm:mb-16 animate-fade-in">
-            <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">
-              Everything You Need to <span className="text-gradient-gold">Succeed</span>
+      {/* Features Section - Card Grid for Mobile */}
+      <section className="py-12 md:py-20 px-4">
+        <div className="max-w-lg mx-auto md:max-w-6xl">
+          <div className="text-center mb-8 animate-fade-in">
+            <h2 className="font-display text-2xl md:text-4xl font-bold text-foreground mb-3">
+              সাফল্যের জন্য <span className="text-gradient-gold">সব কিছু</span>
             </h2>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto px-2">
-              Built by lawyers, for lawyers. Our platform understands the unique challenges of legal practice.
+            <p className="text-sm md:text-base text-muted-foreground max-w-md mx-auto">
+              উকিলদের দ্বারা, উকিলদের জন্য তৈরি।
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             {features.map((feature, index) => (
               <div
                 key={feature.title}
-                className={`glass-card p-4 sm:p-6 hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 animate-fade-in stagger-${index + 1}`}
+                className={`glass-card p-4 md:p-6 hover:shadow-elevated transition-all duration-300 active:scale-[0.98] animate-fade-in stagger-${index + 1}`}
               >
-                <div className="p-2 sm:p-3 rounded-xl bg-primary/10 w-fit mb-3 sm:mb-4">
-                  <feature.icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                <div className="p-2.5 rounded-xl bg-primary/10 w-fit mb-3">
+                  <feature.icon className="w-5 h-5 text-primary" />
                 </div>
-                <h3 className="font-display text-base sm:text-lg font-semibold text-foreground mb-2">
+                <h3 className="font-display text-sm md:text-base font-semibold text-foreground mb-1">
                   {feature.title}
                 </h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">{feature.description}</p>
+                <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
+                  {feature.description}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-12 sm:py-24 relative">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="glass-card p-6 sm:p-12 text-center relative overflow-hidden">
+      {/* CTA Section - Mobile Optimized */}
+      <section className="py-12 md:py-20 px-4">
+        <div className="max-w-lg mx-auto md:max-w-4xl">
+          <div className="glass-card p-6 md:p-10 text-center relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary/10" />
             <div className="relative z-10">
-              <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">
-                Ready to Transform Your Practice?
+              <h2 className="font-display text-xl md:text-3xl font-bold text-foreground mb-3">
+                শুরু করতে প্রস্তুত?
               </h2>
-              <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto mb-6 sm:mb-8 px-2">
-                Join thousands of attorneys who trust LexProSuite to manage their practice efficiently.
+              <p className="text-sm md:text-base text-muted-foreground max-w-md mx-auto mb-6">
+                হাজার হাজার উকিল বিশ্বাস করেন LexProSuite।
               </p>
-              <Button variant="gold" size="lg" className="w-full sm:w-auto" onClick={() => navigate("/login")}>
-                Get Started Today
+              <Button 
+                variant="gold" 
+                size="lg" 
+                className="w-full md:w-auto"
+                onClick={() => navigate("/login")}
+              >
+                আজই শুরু করুন
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </div>
@@ -144,20 +169,20 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border py-8 sm:py-12">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="p-1.5 sm:p-2 rounded-xl gradient-gold">
-                <Scale className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
+      {/* Footer - Compact for Mobile */}
+      <footer className="border-t border-border py-6 px-4 safe-area-inset">
+        <div className="max-w-lg mx-auto md:max-w-6xl">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-xl gradient-gold">
+                <Scale className="w-4 h-4 text-primary-foreground" />
               </div>
-              <span className="font-display text-base sm:text-lg font-bold">
+              <span className="font-display text-base font-bold">
                 LexPro<span className="text-gradient-gold">Suite</span>
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              © 2025 LexProSuite. All rights reserved.
+            <p className="text-xs text-muted-foreground">
+              © 2025 LexProSuite. সর্বস্বত্ব সংরক্ষিত।
             </p>
           </div>
         </div>

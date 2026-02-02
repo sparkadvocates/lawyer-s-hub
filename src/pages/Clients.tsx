@@ -14,8 +14,7 @@ import {
   Building,
   Loader2,
 } from "lucide-react";
-import Sidebar from "@/components/dashboard/Sidebar";
-import Header from "@/components/dashboard/Header";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -224,221 +223,182 @@ const Clients = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background flex">
-      <Sidebar />
-      <div className="flex-1 min-w-0 flex flex-col pl-16 md:pl-0">
-        <Header />
-        <main className="flex-1 p-3 sm:p-6 overflow-auto">
-          <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
-            {/* Page Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+    <DashboardLayout>
+      <div className="space-y-4">
+        {/* Page Header */}
+        <div className="flex flex-col gap-3">
+          <div>
+            <h1 className="text-xl md:text-2xl font-display font-bold text-foreground">ক্লায়েন্ট</h1>
+            <p className="text-sm text-muted-foreground">ক্লায়েন্টদের তথ্য পরিচালনা করুন</p>
+          </div>
+          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+            <DialogTrigger asChild>
+              <Button className="gradient-gold text-primary-foreground shadow-gold w-full">
+                <Plus className="w-4 h-4 mr-2" />
+                নতুন ক্লায়েন্ট
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-card border-border max-w-md mx-4">
+              <DialogHeader>
+                <DialogTitle className="font-display text-lg">নতুন ক্লায়েন্ট যোগ করুন</DialogTitle>
+              </DialogHeader>
+              <ClientForm />
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {/* Stats Cards - 2x2 grid */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="glass-card p-3">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-primary/20">
+                <Users className="w-4 h-4 text-primary" />
+              </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-display font-bold text-foreground">Clients</h1>
-                <p className="text-sm sm:text-base text-muted-foreground mt-1">Manage your client information</p>
+                <p className="text-lg font-bold text-foreground">{clients.length}</p>
+                <p className="text-xs text-muted-foreground">মোট</p>
               </div>
-              <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                <DialogTrigger asChild>
-                  <Button className="gradient-gold text-primary-foreground shadow-gold w-full sm:w-auto">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Client
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="bg-card border-border max-w-md">
-                  <DialogHeader>
-                    <DialogTitle className="font-display text-lg sm:text-xl">Add New Client</DialogTitle>
-                  </DialogHeader>
-                  <ClientForm />
-                </DialogContent>
-              </Dialog>
-            </div>
-
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              <div className="glass-card p-3 sm:p-4">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="p-1.5 sm:p-2 rounded-lg bg-primary/20">
-                    <Users className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-xl sm:text-2xl font-bold text-foreground">{clients.length}</p>
-                    <p className="text-xs sm:text-sm text-muted-foreground">Total</p>
-                  </div>
-                </div>
-              </div>
-              <div className="glass-card p-3 sm:p-4">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="p-1.5 sm:p-2 rounded-lg bg-success/20">
-                    <Building className="w-4 h-4 sm:w-5 sm:h-5 text-success" />
-                  </div>
-                  <div>
-                    <p className="text-xl sm:text-2xl font-bold text-foreground">
-                      {clients.filter((c) => c.company).length}
-                    </p>
-                    <p className="text-xs sm:text-sm text-muted-foreground">Corporate</p>
-                  </div>
-                </div>
-              </div>
-              <div className="glass-card p-3 sm:p-4">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="p-1.5 sm:p-2 rounded-lg bg-info/20">
-                    <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-info" />
-                  </div>
-                  <div>
-                    <p className="text-xl sm:text-2xl font-bold text-foreground">
-                      {clients.filter((c) => c.email).length}
-                    </p>
-                    <p className="text-xs sm:text-sm text-muted-foreground">With Email</p>
-                  </div>
-                </div>
-              </div>
-              <div className="glass-card p-3 sm:p-4">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="p-1.5 sm:p-2 rounded-lg bg-warning/20">
-                    <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-warning" />
-                  </div>
-                  <div>
-                    <p className="text-xl sm:text-2xl font-bold text-foreground">
-                      {clients.filter((c) => c.phone).length}
-                    </p>
-                    <p className="text-xs sm:text-sm text-muted-foreground">With Phone</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Search */}
-            <div className="glass-card p-3 sm:p-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search clients..."
-                  className="pl-10"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
-
-            {/* Clients Table */}
-            <div className="glass-card overflow-hidden">
-              {loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                </div>
-              ) : filteredClients.length === 0 ? (
-                <div className="text-center py-12">
-                  <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium text-foreground mb-1">No clients found</h3>
-                  <p className="text-muted-foreground text-sm">Add your first client to get started</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Client</TableHead>
-                        <TableHead className="hidden sm:table-cell">Contact</TableHead>
-                        <TableHead className="hidden md:table-cell">Company</TableHead>
-                        <TableHead className="hidden lg:table-cell">Address</TableHead>
-                        <TableHead className="hidden sm:table-cell">Added</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredClients.map((client) => (
-                        <TableRow key={client.id}>
-                          <TableCell>
-                            <div className="flex items-center gap-2 sm:gap-3">
-                              <Avatar className="w-8 h-8 sm:w-9 sm:h-9">
-                                <AvatarFallback className="bg-primary/20 text-primary text-xs sm:text-sm">
-                                  {client.name
-                                    .split(" ")
-                                    .map((n) => n[0])
-                                    .join("")
-                                    .slice(0, 2)
-                                    .toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <span className="font-medium text-sm sm:text-base">{client.name}</span>
-                                <div className="sm:hidden text-xs text-muted-foreground">
-                                  {client.email || client.phone || "No contact"}
-                                </div>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="hidden sm:table-cell">
-                            <div className="space-y-1">
-                              {client.email && (
-                                <div className="flex items-center gap-1 text-sm">
-                                  <Mail className="w-3 h-3 text-muted-foreground" />
-                                  <span className="truncate max-w-[150px]">{client.email}</span>
-                                </div>
-                              )}
-                              {client.phone && (
-                                <div className="flex items-center gap-1 text-sm">
-                                  <Phone className="w-3 h-3 text-muted-foreground" />
-                                  {client.phone}
-                                </div>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">{client.company || "-"}</TableCell>
-                          <TableCell className="hidden lg:table-cell max-w-[200px] truncate">
-                            {client.address || "-"}
-                          </TableCell>
-                          <TableCell className="hidden sm:table-cell">
-                            {format(new Date(client.created_at), "MMM d, yyyy")}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon">
-                                  <MoreVertical className="w-4 h-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => openViewDialog(client)}>
-                                  <Eye className="w-4 h-4 mr-2" />
-                                  View Details
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => openEditDialog(client)}>
-                                  <Edit className="w-4 h-4 mr-2" />
-                                  Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  className="text-destructive"
-                                  onClick={() => handleDeleteClient(client.id)}
-                                >
-                                  <Trash2 className="w-4 h-4 mr-2" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
             </div>
           </div>
-        </main>
+          <div className="glass-card p-3">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-success/20">
+                <Building className="w-4 h-4 text-success" />
+              </div>
+              <div>
+                <p className="text-lg font-bold text-foreground">
+                  {clients.filter((c) => c.company).length}
+                </p>
+                <p className="text-xs text-muted-foreground">কর্পোরেট</p>
+              </div>
+            </div>
+          </div>
+          <div className="glass-card p-3">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-info/20">
+                <Mail className="w-4 h-4 text-info" />
+              </div>
+              <div>
+                <p className="text-lg font-bold text-foreground">
+                  {clients.filter((c) => c.email).length}
+                </p>
+                <p className="text-xs text-muted-foreground">ইমেইলসহ</p>
+              </div>
+            </div>
+          </div>
+          <div className="glass-card p-3">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-warning/20">
+                <Phone className="w-4 h-4 text-warning" />
+              </div>
+              <div>
+                <p className="text-lg font-bold text-foreground">
+                  {clients.filter((c) => c.phone).length}
+                </p>
+                <p className="text-xs text-muted-foreground">ফোনসহ</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Search */}
+        <div className="glass-card p-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="ক্লায়েন্ট খুঁজুন..."
+              className="pl-10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* Clients List - Mobile Card View */}
+        <div className="space-y-3">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : filteredClients.length === 0 ? (
+            <div className="glass-card text-center py-12">
+              <Users className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+              <h3 className="text-base font-medium text-foreground mb-1">কোনো ক্লায়েন্ট নেই</h3>
+              <p className="text-sm text-muted-foreground">প্রথম ক্লায়েন্ট যোগ করুন</p>
+            </div>
+          ) : (
+            filteredClients.map((client) => (
+              <div key={client.id} className="glass-card p-3 active:bg-secondary/30 transition-colors">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <Avatar className="w-10 h-10 shrink-0">
+                      <AvatarFallback className="bg-primary/20 text-primary text-sm">
+                        {client.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .slice(0, 2)
+                          .toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-sm text-foreground truncate">{client.name}</p>
+                      {client.company && (
+                        <p className="text-xs text-muted-foreground truncate">{client.company}</p>
+                      )}
+                      <div className="flex items-center gap-2 mt-1">
+                        {client.phone && (
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Phone className="w-3 h-3" />
+                            {client.phone}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => openViewDialog(client)}>
+                        <Eye className="w-4 h-4 mr-2" />
+                        বিস্তারিত
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => openEditDialog(client)}>
+                        <Edit className="w-4 h-4 mr-2" />
+                        সম্পাদনা
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        className="text-destructive"
+                        onClick={() => handleDeleteClient(client.id)}
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        মুছুন
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
       {/* View Dialog */}
       <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-        <DialogContent className="bg-card border-border max-w-md">
+        <DialogContent className="bg-card border-border max-w-md mx-4">
           <DialogHeader>
-            <DialogTitle className="font-display text-xl">Client Details</DialogTitle>
+            <DialogTitle className="font-display text-lg">ক্লায়েন্ট বিবরণ</DialogTitle>
           </DialogHeader>
           {selectedClient && (
             <div className="space-y-4 mt-4">
-              <div className="flex items-center gap-4">
-                <Avatar className="w-16 h-16">
-                  <AvatarFallback className="bg-primary/20 text-primary text-xl">
+              <div className="flex items-center gap-3">
+                <Avatar className="w-14 h-14">
+                  <AvatarFallback className="bg-primary/20 text-primary text-lg">
                     {selectedClient.name
                       .split(" ")
                       .map((n) => n[0])
@@ -448,43 +408,43 @@ const Clients = () => {
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <h3 className="text-lg font-semibold">{selectedClient.name}</h3>
+                  <h3 className="text-base font-semibold">{selectedClient.name}</h3>
                   {selectedClient.company && (
-                    <p className="text-muted-foreground">{selectedClient.company}</p>
+                    <p className="text-sm text-muted-foreground">{selectedClient.company}</p>
                   )}
                 </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {selectedClient.email && (
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 text-sm">
                     <Mail className="w-4 h-4 text-muted-foreground" />
                     <span>{selectedClient.email}</span>
                   </div>
                 )}
                 {selectedClient.phone && (
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 text-sm">
                     <Phone className="w-4 h-4 text-muted-foreground" />
                     <span>{selectedClient.phone}</span>
                   </div>
                 )}
                 {selectedClient.address && (
-                  <div className="flex items-start gap-3">
-                    <MapPin className="w-4 h-4 text-muted-foreground mt-1" />
+                  <div className="flex items-start gap-3 text-sm">
+                    <MapPin className="w-4 h-4 text-muted-foreground mt-0.5" />
                     <span>{selectedClient.address}</span>
                   </div>
                 )}
               </div>
 
               {selectedClient.notes && (
-                <div className="pt-4 border-t border-border">
-                  <p className="text-sm text-muted-foreground mb-1">Notes</p>
-                  <p className="text-foreground">{selectedClient.notes}</p>
+                <div className="pt-3 border-t border-border">
+                  <p className="text-xs text-muted-foreground mb-1">নোট</p>
+                  <p className="text-sm text-foreground">{selectedClient.notes}</p>
                 </div>
               )}
 
-              <div className="pt-4 border-t border-border text-sm text-muted-foreground">
-                Added on {format(new Date(selectedClient.created_at), "MMMM d, yyyy")}
+              <div className="pt-3 border-t border-border text-xs text-muted-foreground">
+                যোগ করা হয়েছে: {format(new Date(selectedClient.created_at), "d MMMM, yyyy")}
               </div>
             </div>
           )}
@@ -493,14 +453,14 @@ const Clients = () => {
 
       {/* Edit Dialog */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="bg-card border-border max-w-md">
+        <DialogContent className="bg-card border-border max-w-md mx-4">
           <DialogHeader>
-            <DialogTitle className="font-display text-xl">Edit Client</DialogTitle>
+            <DialogTitle className="font-display text-lg">ক্লায়েন্ট সম্পাদনা</DialogTitle>
           </DialogHeader>
           <ClientForm isEdit />
         </DialogContent>
       </Dialog>
-    </div>
+    </DashboardLayout>
   );
 };
 

@@ -10,30 +10,30 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 const actions = [
-  { icon: Plus, label: "New Case", color: "text-success", path: "/dashboard/cases" },
-  { icon: UserPlus, label: "Add Client", color: "text-info", path: "/dashboard/clients" },
-  { icon: FileText, label: "Draft Document", color: "text-primary", path: "/dashboard/documents" },
-  { icon: Clock, label: "Log Time", color: "text-warning", path: "/dashboard/time-tracking" },
-  { icon: Upload, label: "Upload File", color: "text-muted-foreground", path: "/dashboard/documents" },
-  { icon: Send, label: "Send Invoice", color: "text-destructive", path: "/dashboard/billing" },
+  { icon: Plus, label: "নতুন কেস", color: "text-success", path: "/dashboard/cases" },
+  { icon: UserPlus, label: "ক্লায়েন্ট যোগ", color: "text-info", path: "/dashboard/clients" },
+  { icon: FileText, label: "ডকুমেন্ট", color: "text-primary", path: "/dashboard/documents" },
+  { icon: Clock, label: "সময় লগ", color: "text-warning", path: "/dashboard/time" },
+  { icon: Upload, label: "আপলোড", color: "text-muted-foreground", path: "/dashboard/documents" },
+  { icon: Send, label: "ইনভয়েস", color: "text-destructive", path: "/dashboard/billing" },
 ];
 
 const QuickActions = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="glass-card p-4 sm:p-6 h-full">
-      <h3 className="font-display text-base sm:text-lg font-semibold mb-3 sm:mb-4">Quick Actions</h3>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+    <div className="glass-card p-4 h-full">
+      <h3 className="font-display text-base font-semibold mb-3">দ্রুত অ্যাকশন</h3>
+      <div className="grid grid-cols-3 gap-2">
         {actions.map((action, index) => (
           <Button
             key={action.label}
             variant="outline"
-            className={`h-auto py-3 sm:py-4 flex-col gap-1.5 sm:gap-2 hover:bg-secondary animate-fade-in stagger-${index + 1}`}
+            className={`h-auto py-3 flex-col gap-1.5 active:scale-95 transition-transform animate-fade-in stagger-${index + 1}`}
             onClick={() => navigate(action.path)}
           >
-            <action.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${action.color}`} />
-            <span className="text-[10px] sm:text-xs">{action.label}</span>
+            <action.icon className={`w-5 h-5 ${action.color}`} />
+            <span className="text-[10px]">{action.label}</span>
           </Button>
         ))}
       </div>

@@ -19,11 +19,11 @@ const buttonVariants = cva(
         "gold-outline": "border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-12 rounded-lg px-8 text-base",
-        xl: "h-14 rounded-xl px-10 text-lg",
-        icon: "h-10 w-10",
+        default: "h-11 px-4 py-2.5 min-h-[44px]",
+        sm: "h-10 rounded-md px-3 min-h-[40px]",
+        lg: "h-12 rounded-lg px-6 text-base min-h-[48px]",
+        xl: "h-14 rounded-xl px-8 text-lg min-h-[56px]",
+        icon: "h-11 w-11 min-h-[44px] min-w-[44px]",
       },
     },
     defaultVariants: {
