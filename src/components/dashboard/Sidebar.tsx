@@ -165,23 +165,49 @@ const Sidebar = () => {
     </div>
   );
 
-  // Mobile: Use Sheet
+  // Mobile: Use Sheet with full width
   if (isMobile) {
     return (
-      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetTrigger asChild>
+      <>
+        {/* Mobile Menu Button - only show when sidebar is closed */}
+        {!mobileOpen && (
           <Button
             variant="ghost"
             size="icon"
+            onClick={() => setMobileOpen(true)}
             className="fixed top-3 left-3 z-50 bg-background/80 backdrop-blur-sm shadow-md md:hidden"
           >
             <Menu className="w-5 h-5" />
           </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-72 p-0 bg-sidebar border-sidebar-border">
+        )}
+        
+        {/* Mobile Sidebar Overlay */}
+        {mobileOpen && (
+          <div 
+            className="fixed inset-0 z-40 bg-black/60 md:hidden"
+            onClick={() => setMobileOpen(false)}
+          />
+        )}
+        
+        {/* Mobile Sidebar */}
+        <aside
+          className={cn(
+            "fixed inset-y-0 left-0 z-50 w-[280px] max-w-[85vw] bg-sidebar border-r border-sidebar-border transition-transform duration-300 ease-in-out md:hidden",
+            mobileOpen ? "translate-x-0" : "-translate-x-full"
+          )}
+        >
+          {/* Close Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setMobileOpen(false)}
+            className="absolute top-3 right-3 z-10"
+          >
+            <X className="w-5 h-5" />
+          </Button>
           <SidebarContent />
-        </SheetContent>
-      </Sheet>
+        </aside>
+      </>
     );
   }
 
