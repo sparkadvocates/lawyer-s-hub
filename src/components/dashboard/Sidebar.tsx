@@ -69,10 +69,18 @@ const Sidebar = () => {
   };
 
   const handleNavClick = (path: string) => {
-    navigate(path);
-    if (isMobile) {
-      setMobileExpanded(false);
+    // Mobile behavior:
+    // - default = collapsed (icons only)
+    // - first tap on any icon expands to show labels
+    // - second tap navigates, then collapses back
+    if (isMobile && !mobileExpanded) {
+      setMobileExpanded(true);
+      return;
     }
+
+    navigate(path);
+
+    if (isMobile) setMobileExpanded(false);
   };
 
   // Determine if sidebar should show text
