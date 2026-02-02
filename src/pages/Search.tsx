@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import Sidebar from "@/components/dashboard/Sidebar";
-import Header from "@/components/dashboard/Header";
+import AppLayout from "@/components/layout/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -126,11 +125,8 @@ const Search = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex w-full">
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 pl-16 md:pl-0">
-        <Header />
-        <main className="flex-1 p-3 sm:p-6 overflow-auto">
+    <AppLayout>
+      <div>
           {/* Search Header */}
           <div className="mb-6">
             <div className="flex items-center gap-3 mb-2">
@@ -380,9 +376,8 @@ const Search = () => {
               </TabsContent>
             </Tabs>
           )}
-        </main>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

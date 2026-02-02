@@ -18,8 +18,7 @@ import {
   Loader2,
   HardDrive,
 } from "lucide-react";
-import Sidebar from "@/components/dashboard/Sidebar";
-import Header from "@/components/dashboard/Header";
+import AppLayout from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -160,12 +159,8 @@ const Documents = () => {
   const totalSize = documents.reduce((acc, d) => acc + (d.file_size || 0), 0);
 
   return (
-    <div className="min-h-screen bg-background flex">
-      <Sidebar />
-      <div className="flex-1 min-w-0 flex flex-col pl-16 md:pl-0">
-        <Header />
-        <main className="flex-1 p-3 sm:p-6 overflow-auto">
-          <div className="max-w-7xl mx-auto space-y-6">
+    <AppLayout>
+      <div className="space-y-6">
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
@@ -507,10 +502,8 @@ const Documents = () => {
                 </div>
               )}
             </div>
-          </div>
-        </main>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

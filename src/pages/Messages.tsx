@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import Sidebar from "@/components/dashboard/Sidebar";
-import Header from "@/components/dashboard/Header";
+import AppLayout from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -239,12 +238,8 @@ const Messages = () => {
   const totalUnread = conversations.reduce((sum, conv) => sum + conv.unreadCount, 0);
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar />
-      <div className="flex-1 min-w-0 flex flex-col pl-16 md:pl-0">
-        <Header />
-        <main className="flex-1 p-3 sm:p-6 overflow-hidden">
-          <div className="max-w-7xl mx-auto h-full">
+    <AppLayout>
+      <div className="h-full">
             {/* Header */}
             <div className="mb-4">
               <h1 className="text-3xl font-display font-bold text-foreground">মেসেজ</h1>
@@ -484,11 +479,9 @@ const Messages = () => {
                   </div>
                 </div>
               )}
-            </Card>
-          </div>
-        </main>
+          </Card>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

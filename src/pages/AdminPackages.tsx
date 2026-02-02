@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "@/components/dashboard/Sidebar";
-import Header from "@/components/dashboard/Header";
+import AppLayout from "@/components/layout/AppLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -383,26 +382,19 @@ const AdminPackages = () => {
 
   if (authLoading || loading) {
     return (
-      <div className="flex h-screen bg-background">
-        <Sidebar />
-        <main className="flex-1 min-w-0 flex flex-col overflow-hidden pl-16 md:pl-0">
-          <Header />
-          <div className="flex-1 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          </div>
-        </main>
-      </div>
+      <AppLayout>
+        <div className="flex-1 flex items-center justify-center min-h-[50vh]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      </AppLayout>
     );
   }
 
   if (!isAdmin) return null;
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-      <main className="flex-1 min-w-0 flex flex-col overflow-hidden pl-16 md:pl-0">
-        <Header />
-        <div className="flex-1 overflow-auto p-3 sm:p-6 space-y-6">
+    <AppLayout>
+      <div className="space-y-6">
           {/* Page Header */}
           <div className="flex items-center justify-between">
             <div>
@@ -782,10 +774,9 @@ const AdminPackages = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-          </Tabs>
-        </div>
-      </main>
-    </div>
+        </Tabs>
+      </div>
+    </AppLayout>
   );
 };
 

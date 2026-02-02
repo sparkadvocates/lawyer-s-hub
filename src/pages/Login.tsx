@@ -3,13 +3,13 @@ import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Scale, Mail, Lock, Eye, EyeOff, ArrowLeft, User, AlertCircle } from "lucide-react";
+import { Scale, Mail, Lock, Eye, EyeOff, ArrowLeft, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { z } from "zod";
 
-const emailSchema = z.string().email("Please enter a valid email address");
-const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
+const emailSchema = z.string().email("সঠিক ইমেইল দিন");
+const passwordSchema = z.string().min(6, "পাসওয়ার্ড কমপক্ষে ৬ অক্ষর হতে হবে");
 
 type AuthMode = "login" | "signup" | "reset";
 
@@ -58,7 +58,7 @@ const Login = () => {
     }
 
     if (mode === "signup" && password !== confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
+      newErrors.confirmPassword = "পাসওয়ার্ড মিলছে না";
     }
 
     setErrors(newErrors);
@@ -77,35 +77,35 @@ const Login = () => {
         const { error } = await signIn(email, password);
         if (error) {
           if (error.message.includes("Invalid login credentials")) {
-            toast.error("Invalid email or password. Please try again.");
+            toast.error("ভুল ইমেইল বা পাসওয়ার্ড");
           } else {
             toast.error(error.message);
           }
         } else {
-          toast.success("Welcome back!");
+          toast.success("স্বাগতম!");
         }
       } else if (mode === "signup") {
         const { error } = await signUp(email, password);
         if (error) {
           if (error.message.includes("User already registered")) {
-            toast.error("This email is already registered. Please sign in instead.");
+            toast.error("এই ইমেইল আগে থেকেই রেজিস্টার্ড");
           } else {
             toast.error(error.message);
           }
         } else {
-          toast.success("Account created successfully!");
+          toast.success("অ্যাকাউন্ট তৈরি হয়েছে!");
         }
       } else if (mode === "reset") {
         const { error } = await resetPassword(email);
         if (error) {
           toast.error(error.message);
         } else {
-          toast.success("Password reset email sent. Please check your inbox.");
+          toast.success("রিসেট লিঙ্ক পাঠানো হয়েছে");
           setMode("login");
         }
       }
     } catch (error: unknown) {
-      toast.error("An unexpected error occurred. Please try again.");
+      toast.error("কিছু সমস্যা হয়েছে");
     } finally {
       setIsLoading(false);
     }
@@ -120,121 +120,78 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-background via-navy-light to-background" />
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-primary/10 rounded-full blur-2xl" />
-        </div>
-        
-        <div className="relative z-10 flex flex-col justify-center items-center w-full p-12">
-          <div className="animate-fade-in">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="p-4 rounded-2xl gradient-gold shadow-gold animate-pulse-glow">
-                <Scale className="w-12 h-12 text-primary-foreground" />
-              </div>
-            </div>
-            
-            <h1 className="font-display text-5xl font-bold text-foreground mb-4">
-              LexPro<span className="text-gradient-gold">Suite</span>
-            </h1>
-            
-            <p className="text-xl text-muted-foreground max-w-md leading-relaxed">
-              The modern legal practice management platform trusted by leading attorneys worldwide.
-            </p>
-            
-            <div className="mt-12 grid grid-cols-2 gap-6 text-sm">
-              {[
-                { label: "Active Users", value: "50,000+" },
-                { label: "Cases Managed", value: "2M+" },
-                { label: "Firms", value: "5,000+" },
-                { label: "Uptime", value: "99.9%" },
-              ].map((stat, index) => (
-                <div 
-                  key={stat.label} 
-                  className={`glass-card p-4 animate-fade-in stagger-${index + 1}`}
-                >
-                  <p className="text-2xl font-bold text-primary">{stat.value}</p>
-                  <p className="text-muted-foreground">{stat.label}</p>
-                </div>
-              ))}
-            </div>
+    <div className="min-h-screen bg-background flex flex-col safe-area-top safe-area-bottom">
+      {/* Header */}
+      <div className="flex items-center justify-center pt-12 pb-8">
+        <div className="flex flex-col items-center gap-3">
+          <div className="p-3 rounded-2xl gradient-gold shadow-gold">
+            <Scale className="w-10 h-10 text-primary-foreground" />
           </div>
+          <h1 className="font-display text-2xl font-bold">
+            LexPro<span className="text-gradient-gold">Suite</span>
+          </h1>
         </div>
       </div>
 
-      {/* Right Panel - Auth Form */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-8 lg:p-12">
-        <div className="w-full max-w-md animate-fade-in">
-          {/* Mobile Logo */}
-          <div className="lg:hidden flex items-center gap-2 sm:gap-3 mb-6 sm:mb-8 justify-center">
-            <div className="p-2 sm:p-3 rounded-xl gradient-gold shadow-gold">
-              <Scale className="w-6 h-6 sm:w-8 sm:h-8 text-primary-foreground" />
-            </div>
-            <h1 className="font-display text-2xl sm:text-3xl font-bold">
-              LexPro<span className="text-gradient-gold">Suite</span>
-            </h1>
-          </div>
-
-          <div className="text-center lg:text-left mb-6 sm:mb-8">
+      {/* Form Container */}
+      <div className="flex-1 px-6">
+        <div className="max-w-sm mx-auto">
+          {/* Title */}
+          <div className="text-center mb-6">
             {mode === "reset" && (
               <button
                 onClick={() => setMode("login")}
-                className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 transition-colors mx-auto lg:mx-0"
+                className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 mx-auto transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
-                Back to login
+                ফিরে যান
               </button>
             )}
-            <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-2">
-              {mode === "login" && "User Login"}
-              {mode === "signup" && "Create Account"}
-              {mode === "reset" && "Reset Password"}
+            <h2 className="font-display text-xl font-bold text-foreground mb-1">
+              {mode === "login" && "লগইন করুন"}
+              {mode === "signup" && "অ্যাকাউন্ট তৈরি করুন"}
+              {mode === "reset" && "পাসওয়ার্ড রিসেট"}
             </h2>
-            <p className="text-sm sm:text-base text-muted-foreground">
-              {mode === "login" && "Sign in to access your dashboard"}
-              {mode === "signup" && "Start managing your legal practice today"}
-              {mode === "reset" && "Enter your email to receive a reset link"}
+            <p className="text-sm text-muted-foreground">
+              {mode === "login" && "আপনার অ্যাকাউন্টে প্রবেশ করুন"}
+              {mode === "signup" && "নতুন অ্যাকাউন্ট তৈরি করুন"}
+              {mode === "reset" && "আপনার ইমেইল দিন"}
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Email */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-foreground text-sm">
-                Email Address
-              </Label>
+              <Label htmlFor="email" className="text-foreground">ইমেইল</Label>
               <div className="relative">
-                <Mail className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
-                  placeholder="user@lawfirm.com"
+                  placeholder="example@email.com"
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
                     if (errors.email) setErrors({ ...errors, email: undefined });
                   }}
-                  className={`pl-10 sm:pl-12 ${errors.email ? 'border-destructive' : ''}`}
+                  className={`pl-12 h-12 text-base ${errors.email ? 'border-destructive' : ''}`}
                   required
                 />
               </div>
               {errors.email && (
-                <p className="text-xs sm:text-sm text-destructive flex items-center gap-1">
+                <p className="text-xs text-destructive flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" />
                   {errors.email}
                 </p>
               )}
             </div>
 
+            {/* Password */}
             {mode !== "reset" && (
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-foreground text-sm">
-                  Password
-                </Label>
+                <Label htmlFor="password" className="text-foreground">পাসওয়ার্ড</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
@@ -244,19 +201,19 @@ const Login = () => {
                       setPassword(e.target.value);
                       if (errors.password) setErrors({ ...errors, password: undefined });
                     }}
-                    className={`pl-10 sm:pl-12 pr-10 sm:pr-12 ${errors.password ? 'border-destructive' : ''}`}
+                    className={`pl-12 pr-12 h-12 text-base ${errors.password ? 'border-destructive' : ''}`}
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="text-xs sm:text-sm text-destructive flex items-center gap-1">
+                  <p className="text-xs text-destructive flex items-center gap-1">
                     <AlertCircle className="w-3 h-3" />
                     {errors.password}
                   </p>
@@ -264,13 +221,12 @@ const Login = () => {
               </div>
             )}
 
+            {/* Confirm Password */}
             {mode === "signup" && (
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-foreground text-sm">
-                  Confirm Password
-                </Label>
+                <Label htmlFor="confirmPassword" className="text-foreground">পাসওয়ার্ড নিশ্চিত করুন</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
                     id="confirmPassword"
                     type={showPassword ? "text" : "password"}
@@ -280,12 +236,12 @@ const Login = () => {
                       setConfirmPassword(e.target.value);
                       if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: undefined });
                     }}
-                    className={`pl-10 sm:pl-12 ${errors.confirmPassword ? 'border-destructive' : ''}`}
+                    className={`pl-12 h-12 text-base ${errors.confirmPassword ? 'border-destructive' : ''}`}
                     required
                   />
                 </div>
                 {errors.confirmPassword && (
-                  <p className="text-xs sm:text-sm text-destructive flex items-center gap-1">
+                  <p className="text-xs text-destructive flex items-center gap-1">
                     <AlertCircle className="w-3 h-3" />
                     {errors.confirmPassword}
                   </p>
@@ -293,84 +249,82 @@ const Login = () => {
               </div>
             )}
 
+            {/* Forgot Password */}
             {mode === "login" && (
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-sm">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" className="rounded border-border bg-secondary" />
-                  <span className="text-muted-foreground text-xs sm:text-sm">Remember me</span>
-                </label>
+              <div className="text-right">
                 <button
                   type="button"
                   onClick={() => setMode("reset")}
-                  className="text-primary hover:underline text-xs sm:text-sm"
+                  className="text-sm text-primary hover:underline"
                 >
-                  Forgot password?
+                  পাসওয়ার্ড ভুলে গেছেন?
                 </button>
               </div>
             )}
 
+            {/* Submit */}
             <Button
               type="submit"
               variant="gold"
               size="lg"
-              className="w-full"
+              className="w-full h-12 text-base"
               disabled={isLoading}
             >
               {isLoading ? (
                 <span className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-                  {mode === "login" && "Signing in..."}
-                  {mode === "signup" && "Creating account..."}
-                  {mode === "reset" && "Sending..."}
+                  অপেক্ষা করুন...
                 </span>
               ) : (
                 <>
-                  {mode === "login" && "Sign In"}
-                  {mode === "signup" && "Create Account"}
-                  {mode === "reset" && "Send Reset Link"}
+                  {mode === "login" && "লগইন"}
+                  {mode === "signup" && "অ্যাকাউন্ট তৈরি"}
+                  {mode === "reset" && "রিসেট লিঙ্ক পাঠান"}
                 </>
               )}
             </Button>
           </form>
 
-          <div className="mt-6 sm:mt-8 text-center space-y-2 sm:space-y-3">
+          {/* Mode Switch */}
+          <div className="mt-6 text-center space-y-3">
             {mode === "login" ? (
               <>
-                <p className="text-muted-foreground text-xs sm:text-sm">
-                  Don't have an account?{" "}
+                <p className="text-muted-foreground text-sm">
+                  অ্যাকাউন্ট নেই?{" "}
                   <button
                     onClick={() => setMode("signup")}
                     className="text-primary hover:underline font-medium"
                   >
-                    Create one now
+                    তৈরি করুন
                   </button>
                 </p>
-                <p className="text-muted-foreground text-xs sm:text-sm">
-                  Are you an admin?{" "}
+                <p className="text-muted-foreground text-sm">
+                  অ্যাডমিন?{" "}
                   <Link to="/admin/login" className="text-destructive hover:underline font-medium">
-                    Admin Login
+                    অ্যাডমিন লগইন
                   </Link>
                 </p>
               </>
             ) : mode === "signup" ? (
-              <p className="text-muted-foreground text-xs sm:text-sm">
-                Already have an account?{" "}
+              <p className="text-muted-foreground text-sm">
+                অ্যাকাউন্ট আছে?{" "}
                 <button
                   onClick={() => setMode("login")}
                   className="text-primary hover:underline font-medium"
                 >
-                  Sign in
+                  লগইন করুন
                 </button>
               </p>
             ) : null}
           </div>
-
-          <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-border">
-            <p className="text-center text-xs text-muted-foreground">
-              Protected by enterprise-grade security. Your data is encrypted and secure.
-            </p>
-          </div>
         </div>
+      </div>
+
+      {/* Footer */}
+      <div className="py-6 px-6">
+        <p className="text-center text-xs text-muted-foreground">
+          এন্টারপ্রাইজ-গ্রেড সিকিউরিটি দ্বারা সুরক্ষিত
+        </p>
       </div>
     </div>
   );
