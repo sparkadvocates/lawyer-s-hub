@@ -72,8 +72,8 @@ const CheckFilters = ({
   return (
     <div className="space-y-4">
       {/* Search and Quick Filters */}
-      <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-[200px]">
+      <div className="grid gap-3 sm:flex sm:flex-wrap">
+        <div className="relative w-full sm:flex-1 sm:min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="চেক নম্বর, ব্যাংক খুঁজুন..."
@@ -84,7 +84,7 @@ const CheckFilters = ({
         </div>
         
         <Select value={filterType} onValueChange={(v) => setFilterType(v as FilterType)}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px]">
             <Filter className="w-4 h-4 mr-2" />
             <SelectValue />
           </SelectTrigger>
@@ -98,7 +98,7 @@ const CheckFilters = ({
         </Select>
 
         <Select value={noticeStatusFilter} onValueChange={(v) => setNoticeStatusFilter(v as NoticeStatus | 'all')}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -111,7 +111,7 @@ const CheckFilters = ({
         </Select>
 
         <Select value={bankFilter} onValueChange={setBankFilter}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="ব্যাংক নির্বাচন" />
           </SelectTrigger>
           <SelectContent>
@@ -126,10 +126,10 @@ const CheckFilters = ({
       </div>
 
       {/* Sorting */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="grid gap-3 sm:flex sm:flex-wrap sm:items-center">
         <span className="text-sm text-muted-foreground">সর্ট করুন:</span>
         <Select value={sortField} onValueChange={(v) => setSortField(v as SortField)}>
-          <SelectTrigger className="w-[160px]">
+          <SelectTrigger className="w-full sm:w-[160px]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -142,7 +142,7 @@ const CheckFilters = ({
         </Select>
 
         <Select value={sortOrder} onValueChange={(v) => setSortOrder(v as SortOrder)}>
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="w-full sm:w-[140px]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -152,7 +152,12 @@ const CheckFilters = ({
         </Select>
 
         {hasActiveFilters && (
-          <Button variant="ghost" size="sm" onClick={onClearFilters} className="gap-1 text-muted-foreground">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClearFilters}
+            className="gap-1 text-muted-foreground justify-start sm:justify-center"
+          >
             <X className="w-4 h-4" />
             ফিল্টার মুছুন
           </Button>
