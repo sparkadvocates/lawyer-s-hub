@@ -1,87 +1,72 @@
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import StatCard from "@/components/dashboard/StatCard";
+import { Briefcase, Users, Gavel, Clock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useDashboardStats } from "@/hooks/useDashboardStats";
+import AppLayout from "@/components/layout/AppLayout";
+import { cn } from "@/lib/utils";
 import RecentCases from "@/components/dashboard/RecentCases";
 import UpcomingEvents from "@/components/dashboard/UpcomingEvents";
 import QuickActions from "@/components/dashboard/QuickActions";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
-import { Briefcase, Users, Gavel, Clock } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
 
 const UserDashboard = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
+  const { stats, loading } = useDashboardStats();
 
   const getUserName = () => {
-    if (!user?.email) return "there";
+    if (!user?.email) return "";
     return user.email.split("@")[0];
   };
 
+  const statCards = [
+    { icon: Briefcase, label: "সক্রিয় কেস", value: stats?.activeCases || 0, color: "text-primary", bg: "bg-primary/10" },
+    { icon: Users, label: "ক্লায়েন্ট", value: stats?.totalClients || 0, color: "text-info", bg: "bg-info/10" },
+    { icon: Gavel, label: "আসন্ন শুনানি", value: stats?.upcomingHearings || 0, color: "text-warning", bg: "bg-warning/10" },
+    { icon: Clock, label: "মোট কেস", value: stats?.totalCases || 0, color: "text-success", bg: "bg-success/10" },
+  ];
+
   return (
-    <DashboardLayout>
-      {/* Welcome Section */}
-      <div className="mb-6 animate-fade-in">
-        <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-1">
-          স্বাগতম, <span className="text-gradient-gold">{getUserName()}</span>
-        </h1>
-        <p className="text-sm md:text-base text-muted-foreground">
-          আজকের কেস আপডেট দেখুন।
-        </p>
-      </div>
-
-      {/* Stats Grid - 2x2 on mobile */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
-        <StatCard
-          title="সক্রিয় কেস"
-          value={24}
-          change="+3 এই মাসে"
-          changeType="positive"
-          icon={Briefcase}
-          iconColor="text-primary"
-          className="animate-fade-in stagger-1"
-        />
-        <StatCard
-          title="মোট ক্লায়েন্ট"
-          value={156}
-          change="+12 এই কোয়ার্টার"
-          changeType="positive"
-          icon={Users}
-          iconColor="text-info"
-          className="animate-fade-in stagger-2"
-        />
-        <StatCard
-          title="আসন্ন শুনানি"
-          value={8}
-          change="পরবর্তী: আগামীকাল"
-          changeType="neutral"
-          icon={Gavel}
-          iconColor="text-warning"
-          className="animate-fade-in stagger-3"
-        />
-        <StatCard
-          title="বিলযোগ্য ঘন্টা"
-          value="142.5"
-          change="+18% গত মাসের তুলনায়"
-          changeType="positive"
-          icon={Clock}
-          iconColor="text-success"
-          className="animate-fade-in stagger-4"
-        />
-      </div>
-
-      {/* Main Content Grid - Stack on mobile */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6">
-        {/* Left Column - Cases & Events */}
-        <div className="xl:col-span-2 space-y-4 md:space-y-6">
-          <RecentCases />
-          <UpcomingEvents />
+    <AppLayout title="ড্যাশবোর্ড" showSearch>
+      <div className="p-4 space-y-6">
+        {/* Welcome */}
+        <div>
+          <h1 className="text-xl font-bold text-foreground">
+            স্বাগতম, <span className="text-primary">{getUserName()}</span> 👋
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">আজকের কেস আপডেট দেখুন</p>
         </div>
 
-        {/* Right Column - Actions & Activity */}
-        <div className="space-y-4 md:space-y-6">
-          <QuickActions />
-          <ActivityFeed />
+        {/* Stats */}
+        <div className="grid grid-cols-2 gap-3">
+          {statCards.map((stat) => (
+            <div key={stat.label} className="p-4 rounded-2xl bg-card border border-border">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
+                </div>
+                <div className={cn("p-2 rounded-xl", stat.bg)}>
+                  <stat.icon className={cn("w-4 h-4", stat.color)} />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
+
+        {/* Quick Actions */}
+        <QuickActions />
+
+        {/* Recent Cases */}
+        <RecentCases />
+
+        {/* Upcoming Events */}
+        <UpcomingEvents />
+
+        {/* Activity Feed */}
+        <ActivityFeed />
       </div>
-    </DashboardLayout>
+    </AppLayout>
   );
 };
 

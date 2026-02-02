@@ -1,396 +1,256 @@
-import { useState, useEffect } from "react";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import StatCard from "@/components/dashboard/StatCard";
-import QuickActions from "@/components/dashboard/QuickActions";
-import { Briefcase, Users, Gavel, Clock, ShieldCheck, TrendingUp, DollarSign } from "lucide-react";
+import { Briefcase, Users, Gavel, Clock, Plus, ArrowRight, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { useCases } from "@/hooks/useCases";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Area,
-  AreaChart,
-} from "recharts";
-import { format } from "date-fns";
+import AppLayout from "@/components/layout/AppLayout";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-
-const COLORS = ["hsl(var(--primary))", "hsl(var(--success))", "hsl(var(--warning))", "hsl(var(--info))", "hsl(var(--destructive))", "hsl(var(--muted))"];
-
-const statusColors: Record<string, string> = {
-  "Open": "hsl(var(--info))",
-  "In Progress": "hsl(var(--success))",
-  "Pending": "hsl(var(--warning))",
-  "Closed": "hsl(var(--muted-foreground))",
-  "Won": "hsl(var(--success))",
-  "Lost": "hsl(var(--destructive))",
-};
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+import { format, isToday, isTomorrow } from "date-fns";
 
 const Dashboard = () => {
-  const { user, role, isAdmin, refreshRole } = useAuth();
+  const navigate = useNavigate();
+  const { user, isAdmin } = useAuth();
   const { stats, loading: statsLoading } = useDashboardStats();
   const { cases, loading: casesLoading } = useCases();
-  const [showAdminBanner, setShowAdminBanner] = useState(false);
-  const [bootstrapping, setBootstrapping] = useState(false);
-
-  useEffect(() => {
-    if (user && role === "user") {
-      setShowAdminBanner(true);
-    } else {
-      setShowAdminBanner(false);
-    }
-  }, [user, role]);
-
-  const handleBootstrapAdmin = async () => {
-    try {
-      setBootstrapping(true);
-      const { data: sessionData } = await supabase.auth.getSession();
-
-      const response = await supabase.functions.invoke("bootstrap-admin", {
-        headers: {
-          Authorization: `Bearer ${sessionData.session?.access_token}`,
-        },
-      });
-
-      if (response.error) {
-        throw new Error(response.error.message || "Failed to become admin");
-      }
-
-      if (response.data?.error) {
-        toast.info(response.data.error);
-        setShowAdminBanner(false);
-        return;
-      }
-
-      toast.success("You are now an admin!");
-      setShowAdminBanner(false);
-      await refreshRole();
-    } catch (error: any) {
-      console.error("Error:", error);
-      toast.error(error.message || "Failed to become admin");
-    } finally {
-      setBootstrapping(false);
-    }
-  };
 
   const getUserName = () => {
-    if (!user?.email) return "there";
+    if (!user?.email) return "";
     return user.email.split("@")[0];
   };
 
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "শুভ সকাল";
-    if (hour < 17) return "শুভ অপরাহ্ন";
-    return "শুভ সন্ধ্যা";
+  // Get upcoming hearings
+  const upcomingHearings = cases
+    ?.filter(c => c.next_hearing_date && new Date(c.next_hearing_date) >= new Date())
+    .sort((a, b) => new Date(a.next_hearing_date!).getTime() - new Date(b.next_hearing_date!).getTime())
+    .slice(0, 3) || [];
+
+  // Get recent cases
+  const recentCases = cases?.slice(0, 4) || [];
+
+  const getDateLabel = (dateStr: string) => {
+    const date = new Date(dateStr);
+    if (isToday(date)) return "আজ";
+    if (isTomorrow(date)) return "আগামীকাল";
+    return format(date, "dd MMM");
   };
 
-  // Get upcoming hearings from cases
-  const upcomingHearings = cases
-    .filter((c) => c.next_hearing_date && new Date(c.next_hearing_date) >= new Date())
-    .sort((a, b) => new Date(a.next_hearing_date!).getTime() - new Date(b.next_hearing_date!).getTime())
-    .slice(0, 5);
+  const statCards = [
+    { icon: Briefcase, label: "সক্রিয় কেস", value: stats?.activeCases || 0, color: "text-primary", bg: "bg-primary/10" },
+    { icon: Users, label: "ক্লায়েন্ট", value: stats?.totalClients || 0, color: "text-info", bg: "bg-info/10" },
+    { icon: Gavel, label: "আসন্ন শুনানি", value: stats?.upcomingHearings || 0, color: "text-warning", bg: "bg-warning/10" },
+    { icon: Clock, label: "মোট কেস", value: stats?.totalCases || 0, color: "text-success", bg: "bg-success/10" },
+  ];
 
-  // Recent cases
-  const recentCases = [...cases]
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    .slice(0, 5);
+  const quickActions = [
+    { label: "নতুন কেস", icon: Briefcase, path: "/dashboard/cases", color: "bg-primary" },
+    { label: "নতুন ক্লায়েন্ট", icon: Users, path: "/dashboard/clients", color: "bg-info" },
+    { label: "চেক এন্ট্রি", icon: Gavel, path: "/dashboard/checks", color: "bg-warning" },
+    { label: "ক্যালেন্ডার", icon: Clock, path: "/dashboard/calendar", color: "bg-success" },
+  ];
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-          <p className="text-sm font-medium text-foreground">{label}</p>
-          {payload.map((entry: any, index: number) => (
-            <p key={index} className="text-sm text-muted-foreground">
-              {entry.name}: <span className="font-medium text-foreground">{entry.value}</span>
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
+  const statusColors: Record<string, string> = {
+    open: "bg-success/20 text-success",
+    in_progress: "bg-info/20 text-info",
+    pending: "bg-warning/20 text-warning",
+    closed: "bg-muted text-muted-foreground",
   };
 
   return (
-    <DashboardLayout>
-      {/* Admin Bootstrap Banner */}
-      {showAdminBanner && !isAdmin && (
-        <Alert className="mb-4 border-primary/50 bg-primary/5">
-          <ShieldCheck className="h-4 w-4" />
-          <AlertTitle className="text-sm">অ্যাডমিন হন</AlertTitle>
-          <AlertDescription className="flex flex-col gap-3">
-            <span className="text-xs">
-              এখনো কোনো অ্যাডমিন নেই। প্রথম অ্যাডমিন হতে বোতামে ক্লিক করুন।
-            </span>
-            <Button
-              size="sm"
-              onClick={handleBootstrapAdmin}
-              disabled={bootstrapping}
-              className="w-full"
-            >
-              {bootstrapping ? "সেটআপ হচ্ছে..." : "অ্যাডমিন হন"}
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Welcome Section */}
-      <div className="mb-5 animate-fade-in">
-        <h1 className="font-display text-xl md:text-2xl font-bold text-foreground mb-1">
-          {getGreeting()}, <span className="text-gradient-gold">{getUserName()}</span>
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          আজকের কেস আপডেট দেখুন।
-        </p>
-      </div>
-
-      {/* Stats Grid - 2x2 on mobile */}
-      <div className="grid grid-cols-2 gap-3 mb-5">
-        <StatCard
-          title="সক্রিয় কেস"
-          value={stats.activeCases}
-          change={`${stats.totalCases} মোট`}
-          changeType="neutral"
-          icon={Briefcase}
-          iconColor="text-primary"
-          className="animate-fade-in stagger-1"
-        />
-        <StatCard
-          title="মোট ক্লায়েন্ট"
-          value={stats.totalClients}
-          change="সর্বকালের"
-          changeType="neutral"
-          icon={Users}
-          iconColor="text-info"
-          className="animate-fade-in stagger-2"
-        />
-        <StatCard
-          title="আসন্ন শুনানি"
-          value={stats.upcomingHearings}
-          change={upcomingHearings[0] ? `পরবর্তী: ${format(new Date(upcomingHearings[0].next_hearing_date!), "d MMM")}` : "নির্ধারিত নেই"}
-          changeType="neutral"
-          icon={Gavel}
-          iconColor="text-warning"
-          className="animate-fade-in stagger-3"
-        />
-        <StatCard
-          title="বিচারাধীন"
-          value={stats.pendingCases}
-          change={`${stats.closedCases} সমাপ্ত`}
-          changeType="neutral"
-          icon={Clock}
-          iconColor="text-success"
-          className="animate-fade-in stagger-4"
-        />
-      </div>
-
-      {/* Charts - Stack on mobile */}
-      <div className="space-y-4 mb-5">
-        {/* Cases Trend Chart */}
-        <div className="glass-card p-4">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="font-display text-base font-semibold text-foreground">কেস ট্রেন্ড</h3>
-              <p className="text-xs text-muted-foreground">গত ৬ মাসের নতুন কেস</p>
-            </div>
-            <div className="p-2 rounded-lg bg-primary/20">
-              <TrendingUp className="w-4 h-4 text-primary" />
-            </div>
-          </div>
-          <div className="h-[180px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={stats.casesByMonth}>
-                <defs>
-                  <linearGradient id="caseGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis 
-                  dataKey="month" 
-                  stroke="hsl(var(--muted-foreground))" 
-                  fontSize={10}
-                  tickLine={false}
-                />
-                <YAxis 
-                  stroke="hsl(var(--muted-foreground))" 
-                  fontSize={10}
-                  tickLine={false}
-                  axisLine={false}
-                  width={25}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Area
-                  type="monotone"
-                  dataKey="count"
-                  name="কেস"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth={2}
-                  fill="url(#caseGradient)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+    <AppLayout title="ড্যাশবোর্ড" showSearch>
+      <div className="p-4 space-y-6">
+        {/* Welcome Section */}
+        <div className="animate-fade-in">
+          <h1 className="text-xl font-bold text-foreground">
+            স্বাগতম, <span className="text-primary">{getUserName()}</span> 👋
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">আজকের কেস আপডেট দেখুন</p>
         </div>
 
-        {/* Revenue Chart */}
-        <div className="glass-card p-4">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="font-display text-base font-semibold text-foreground">আয়</h3>
-              <p className="text-xs text-muted-foreground">মাসিক সাবস্ক্রিপশন আয়</p>
-            </div>
-            <div className="p-2 rounded-lg bg-success/20">
-              <DollarSign className="w-4 h-4 text-success" />
-            </div>
-          </div>
-          <div className="h-[180px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stats.revenueByMonth}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis 
-                  dataKey="month" 
-                  stroke="hsl(var(--muted-foreground))" 
-                  fontSize={10}
-                  tickLine={false}
-                />
-                <YAxis 
-                  stroke="hsl(var(--muted-foreground))" 
-                  fontSize={10}
-                  tickLine={false}
-                  axisLine={false}
-                  width={35}
-                  tickFormatter={(value) => `৳${value}`}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar
-                  dataKey="amount"
-                  name="আয় (৳)"
-                  fill="hsl(var(--success))"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
-
-      {/* Pie Chart + Quick Actions Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-        {/* Cases by Status Pie Chart */}
-        <div className="glass-card p-4">
-          <h3 className="font-display text-base font-semibold text-foreground mb-3">স্ট্যাটাস অনুযায়ী কেস</h3>
-          <div className="h-[160px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={stats.casesByStatus}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={35}
-                  outerRadius={55}
-                  paddingAngle={2}
-                  dataKey="count"
-                  nameKey="status"
-                >
-                  {stats.casesByStatus.map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fill={statusColors[entry.status] || COLORS[index % COLORS.length]} 
-                    />
-                  ))}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="flex flex-wrap justify-center gap-2 mt-3">
-            {stats.casesByStatus.map((entry, index) => (
-              <div key={entry.status} className="flex items-center gap-1.5 text-xs">
-                <div 
-                  className="w-2 h-2 rounded-full" 
-                  style={{ backgroundColor: statusColors[entry.status] || COLORS[index % COLORS.length] }}
-                />
-                <span className="text-muted-foreground">{entry.status}</span>
+        {/* Stats Grid - 2x2 */}
+        <div className="grid grid-cols-2 gap-3">
+          {statsLoading ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-20 rounded-2xl" />
+            ))
+          ) : (
+            statCards.map((stat, idx) => (
+              <div
+                key={stat.label}
+                className={cn(
+                  "p-4 rounded-2xl bg-card border border-border",
+                  "animate-fade-in"
+                )}
+                style={{ animationDelay: `${idx * 50}ms` }}
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
+                  </div>
+                  <div className={cn("p-2 rounded-xl", stat.bg)}>
+                    <stat.icon className={cn("w-4 h-4", stat.color)} />
+                  </div>
+                </div>
               </div>
+            ))
+          )}
+        </div>
+
+        {/* Quick Actions - Horizontal Scroll */}
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-1">
+            দ্রুত অ্যাকশন
+          </h2>
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+            {quickActions.map((action) => (
+              <button
+                key={action.path}
+                onClick={() => navigate(action.path)}
+                className="flex flex-col items-center gap-2 p-3 min-w-[80px] rounded-2xl bg-card border border-border active:scale-95 transition-transform"
+              >
+                <div className={cn("p-3 rounded-xl", action.color)}>
+                  <action.icon className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-xs font-medium text-foreground whitespace-nowrap">{action.label}</span>
+              </button>
             ))}
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <QuickActions />
-      </div>
+        {/* Upcoming Hearings */}
+        {upcomingHearings.length > 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between px-1">
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                আসন্ন শুনানি
+              </h2>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-primary h-auto p-0"
+                onClick={() => navigate("/dashboard/calendar")}
+              >
+                সব দেখুন <ArrowRight className="w-3 h-3 ml-1" />
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {upcomingHearings.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => navigate(`/dashboard/cases?case=${c.id}`)}
+                  className="w-full p-4 rounded-2xl bg-card border border-border text-left active:bg-secondary/80 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      "p-2 rounded-xl",
+                      isToday(new Date(c.next_hearing_date!)) ? "bg-destructive/20" : "bg-warning/20"
+                    )}>
+                      <Gavel className={cn(
+                        "w-4 h-4",
+                        isToday(new Date(c.next_hearing_date!)) ? "text-destructive" : "text-warning"
+                      )} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground truncate">{c.title}</p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                        <span className="font-medium text-foreground">
+                          {getDateLabel(c.next_hearing_date!)}
+                        </span>
+                        {c.court_name && (
+                          <>
+                            <span>•</span>
+                            <span className="truncate">{c.court_name}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
-      {/* Recent Cases & Upcoming Hearings - Stack on mobile */}
-      <div className="space-y-4">
         {/* Recent Cases */}
-        <div className="glass-card p-4">
-          <h3 className="font-display text-base font-semibold text-foreground mb-3">সাম্প্রতিক কেস</h3>
-          {recentCases.length === 0 ? (
-            <p className="text-muted-foreground text-center py-6 text-sm">এখনো কোনো কেস নেই</p>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              সাম্প্রতিক কেস
+            </h2>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-primary h-auto p-0"
+              onClick={() => navigate("/dashboard/cases")}
+            >
+              সব দেখুন <ArrowRight className="w-3 h-3 ml-1" />
+            </Button>
+          </div>
+          
+          {casesLoading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-16 rounded-2xl" />
+              ))}
+            </div>
+          ) : recentCases.length === 0 ? (
+            <div className="p-8 rounded-2xl bg-card border border-border text-center">
+              <Briefcase className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground">কোন কেস নেই</p>
+              <Button 
+                variant="gold" 
+                size="sm" 
+                className="mt-3"
+                onClick={() => navigate("/dashboard/cases")}
+              >
+                <Plus className="w-4 h-4 mr-1" /> নতুন কেস
+              </Button>
+            </div>
           ) : (
             <div className="space-y-2">
               {recentCases.map((c) => (
-                <div key={c.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 active:bg-secondary/50 transition-colors">
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-foreground truncate text-sm">{c.title}</p>
-                    <p className="text-xs text-muted-foreground">{c.case_number}</p>
+                <button
+                  key={c.id}
+                  onClick={() => navigate(`/dashboard/cases?case=${c.id}`)}
+                  className="w-full p-4 rounded-2xl bg-card border border-border text-left active:bg-secondary/80 transition-colors"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-foreground truncate">{c.title}</p>
+                        <Badge className={cn("text-[10px] px-1.5", statusColors[c.status])}>
+                          {c.status}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                        {c.case_number} • {c.case_type || "General"}
+                      </p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                   </div>
-                  <Badge 
-                    variant="outline" 
-                    className="ml-2 shrink-0 text-xs"
-                    style={{ 
-                      borderColor: statusColors[c.status.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase())] || "hsl(var(--border))",
-                      color: statusColors[c.status.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase())] || "hsl(var(--foreground))"
-                    }}
-                  >
-                    {c.status.replace("_", " ")}
-                  </Badge>
-                </div>
+                </button>
               ))}
             </div>
           )}
         </div>
 
-        {/* Upcoming Hearings */}
-        <div className="glass-card p-4">
-          <h3 className="font-display text-base font-semibold text-foreground mb-3">আসন্ন শুনানি</h3>
-          {upcomingHearings.length === 0 ? (
-            <p className="text-muted-foreground text-center py-6 text-sm">কোনো আসন্ন শুনানি নেই</p>
-          ) : (
-            <div className="space-y-2">
-              {upcomingHearings.map((c) => (
-                <div key={c.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 active:bg-secondary/50 transition-colors">
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-foreground truncate text-sm">{c.title}</p>
-                    <p className="text-xs text-muted-foreground">{c.court_name || "আদালত নির্দিষ্ট নেই"}</p>
-                  </div>
-                  <div className="ml-2 shrink-0 text-right">
-                    <p className="text-xs font-medium text-warning">
-                      {format(new Date(c.next_hearing_date!), "d MMM, yyyy")}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        {/* Admin Quick Link */}
+        {isAdmin && (
+          <Button
+            variant="outline"
+            className="w-full justify-between"
+            onClick={() => navigate("/dashboard/settings")}
+          >
+            <span>অ্যাডমিন সেটিংস</span>
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        )}
       </div>
-    </DashboardLayout>
+    </AppLayout>
   );
 };
 
