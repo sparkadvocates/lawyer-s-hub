@@ -21,15 +21,15 @@ const StatCard = ({
   className,
 }: StatCardProps) => {
   return (
-    <div className={cn("stat-card", className)}>
-      <div className="flex items-start justify-between">
-        <div className="space-y-1 sm:space-y-2 min-w-0 flex-1">
-          <p className="text-xs sm:text-sm text-muted-foreground truncate">{title}</p>
-          <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground font-display">{value}</p>
+    <div className={cn("stat-card p-3 md:p-4", className)}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="space-y-1 min-w-0 flex-1">
+          <p className="text-xs text-muted-foreground truncate">{title}</p>
+          <p className="text-lg md:text-2xl font-bold text-foreground font-display">{value}</p>
           {change && (
             <p
               className={cn(
-                "text-xs sm:text-sm truncate",
+                "text-xs truncate",
                 changeType === "positive" && "text-success",
                 changeType === "negative" && "text-destructive",
                 changeType === "neutral" && "text-muted-foreground"
@@ -39,8 +39,8 @@ const StatCard = ({
             </p>
           )}
         </div>
-        <div className={cn("p-2 sm:p-3 rounded-xl bg-secondary shrink-0", iconColor)}>
-          <Icon className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
+        <div className={cn("p-2 rounded-xl bg-secondary shrink-0", iconColor)}>
+          <Icon className="w-4 h-4" />
         </div>
       </div>
     </div>
