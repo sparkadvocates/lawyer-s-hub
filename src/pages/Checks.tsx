@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useChecks, Check, CreateCheckData, NoticeStatus } from "@/hooks/useChecks";
 import { useClients } from "@/hooks/useClients";
 import { useCases } from "@/hooks/useCases";
-import DashboardLayout from "@/components/layout/DashboardLayout";
+import AppLayout from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,11 +13,14 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, FileCheck } from "lucide-react";
 import CheckFilters, { FilterType, SortField, SortOrder } from "@/components/checks/CheckFilters";
+import MobileCheckFilters from "@/components/checks/MobileCheckFilters";
 import CheckStats from "@/components/checks/CheckStats";
 import CheckAlerts from "@/components/checks/CheckAlerts";
 import CheckTable from "@/components/checks/CheckTable";
+import MobileCheckCard from "@/components/checks/MobileCheckCard";
 import CheckReports from "@/components/checks/CheckReports";
 import CheckDetailModal from "@/components/checks/CheckDetailModal";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const noticeStatusLabels: Record<NoticeStatus, string> = {
   pending: 'অপেক্ষমাণ',
@@ -28,6 +31,7 @@ const noticeStatusLabels: Record<NoticeStatus, string> = {
 };
 
 const Checks = () => {
+  const isMobile = useIsMobile();
   const { checks, loading, alerts, createCheck, updateCheck, deleteCheck } = useChecks();
   const { clients } = useClients();
   const { cases } = useCases();
@@ -142,12 +146,12 @@ const Checks = () => {
   };
 
   return (
-    <DashboardLayout>
+    <AppLayout title="চেক ম্যানেজমেন্ট" showSearch={false}>
       <div className="space-y-4">
         {/* Header */}
         <div className="flex flex-col gap-3">
           <div>
-            <h1 className="text-xl md:text-2xl font-display font-bold text-foreground">চেক ম্যানেজমেন্ট</h1>
+            <h1 className="text-xl font-display font-bold text-foreground">চেক ম্যানেজমেন্ট</h1>
             <p className="text-sm text-muted-foreground">চেক ডিস অনার ও নোটিশ ট্র্যাকিং</p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -252,22 +256,62 @@ const Checks = () => {
           </TabsList>
 
           <TabsContent value="list" className="space-y-3">
-            <CheckFilters
-              searchQuery={searchQuery} setSearchQuery={setSearchQuery}
-              filterType={filterType} setFilterType={setFilterType}
-              noticeStatusFilter={noticeStatusFilter} setNoticeStatusFilter={setNoticeStatusFilter}
-              sortField={sortField} setSortField={setSortField}
-              sortOrder={sortOrder} setSortOrder={setSortOrder}
-              bankFilter={bankFilter} setBankFilter={setBankFilter}
-              banks={banks} onClearFilters={clearFilters}
-            />
-            <Card className="glass-card overflow-hidden">
-              <CardHeader className="p-3">
-                <CardTitle className="flex items-center gap-2 text-sm"><FileCheck className="w-4 h-4" />চেক তালিকা</CardTitle>
-                <CardDescription className="text-xs">মোট {filteredChecks.length}টি</CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                {loading ? <div className="text-center py-8 text-sm">লোড হচ্ছে...</div> : (
+            {/* Filters - Mobile vs Desktop */}
+            {isMobile ? (
+              <MobileCheckFilters
+                searchQuery={searchQuery} setSearchQuery={setSearchQuery}
+                filterType={filterType} setFilterType={setFilterType}
+                noticeStatusFilter={noticeStatusFilter} setNoticeStatusFilter={setNoticeStatusFilter}
+                sortField={sortField} setSortField={setSortField}
+                sortOrder={sortOrder} setSortOrder={setSortOrder}
+                bankFilter={bankFilter} setBankFilter={setBankFilter}
+                banks={banks} onClearFilters={clearFilters}
+              />
+            ) : (
+              <CheckFilters
+                searchQuery={searchQuery} setSearchQuery={setSearchQuery}
+                filterType={filterType} setFilterType={setFilterType}
+                noticeStatusFilter={noticeStatusFilter} setNoticeStatusFilter={setNoticeStatusFilter}
+                sortField={sortField} setSortField={setSortField}
+                sortOrder={sortOrder} setSortOrder={setSortOrder}
+                bankFilter={bankFilter} setBankFilter={setBankFilter}
+                banks={banks} onClearFilters={clearFilters}
+              />
+            )}
+
+            {/* Check List */}
+            {loading ? (
+              <div className="text-center py-8 text-sm text-muted-foreground">লোড হচ্ছে...</div>
+            ) : isMobile ? (
+              /* Mobile Card View */
+              <div className="space-y-3">
+                {filteredChecks.length === 0 ? (
+                  <div className="text-center py-12">
+                    <FileCheck className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+                    <p className="text-muted-foreground">কোনো চেক পাওয়া যায়নি</p>
+                  </div>
+                ) : (
+                  filteredChecks.map((check) => (
+                    <MobileCheckCard
+                      key={check.id}
+                      check={check}
+                      alerts={alerts}
+                      onEdit={handleOpenDialog}
+                      onDelete={handleDelete}
+                      onView={setViewingCheck}
+                      isHighlighted={highlightedCheckId === check.id}
+                    />
+                  ))
+                )}
+              </div>
+            ) : (
+              /* Desktop Table View */
+              <Card className="glass-card overflow-hidden">
+                <CardHeader className="p-3">
+                  <CardTitle className="flex items-center gap-2 text-sm"><FileCheck className="w-4 h-4" />চেক তালিকা</CardTitle>
+                  <CardDescription className="text-xs">মোট {filteredChecks.length}টি</CardDescription>
+                </CardHeader>
+                <CardContent className="p-0">
                   <div className="overflow-x-auto">
                     <CheckTable
                       checks={filteredChecks} alerts={alerts}
@@ -275,9 +319,9 @@ const Checks = () => {
                       onView={setViewingCheck} highlightedCheckId={highlightedCheckId}
                     />
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="alerts">
@@ -291,7 +335,7 @@ const Checks = () => {
       </div>
 
       <CheckDetailModal check={viewingCheck} alerts={alerts} isOpen={!!viewingCheck} onClose={() => setViewingCheck(null)} />
-    </DashboardLayout>
+    </AppLayout>
   );
 };
 
