@@ -21,8 +21,7 @@ import {
   ChevronRight,
   Filter,
 } from "lucide-react";
-import Sidebar from "@/components/dashboard/Sidebar";
-import Header from "@/components/dashboard/Header";
+import AppLayout from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -756,12 +755,8 @@ const CourtDates = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
-      <Sidebar />
-      <div className="flex-1 min-w-0 flex flex-col pl-16 md:pl-0">
-        <Header />
-        <main className="flex-1 p-3 sm:p-6 overflow-auto">
-          <div className="max-w-7xl mx-auto space-y-6">
+    <AppLayout>
+      <div className="space-y-6">
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
@@ -949,9 +944,6 @@ const CourtDates = () => {
               </TabsContent>
             </Tabs>
           </div>
-        </main>
-      </div>
-
       {/* Edit Dialog */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent className="bg-card border-border max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -1087,7 +1079,7 @@ const CourtDates = () => {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </AppLayout>
   );
 };
 

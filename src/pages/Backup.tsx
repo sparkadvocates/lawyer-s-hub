@@ -25,8 +25,7 @@ import {
   RefreshCw,
   Activity,
 } from "lucide-react";
-import Sidebar from "@/components/dashboard/Sidebar";
-import Header from "@/components/dashboard/Header";
+import AppLayout from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -165,12 +164,8 @@ const Backup = () => {
   const driveBackupCount = backups.filter(b => b.type === "google_drive").length;
 
   return (
-    <div className="min-h-screen bg-background flex">
-      <Sidebar />
-      <div className="flex-1 min-w-0 flex flex-col pl-16 md:pl-0">
-        <Header />
-        <main className="flex-1 p-3 sm:p-6 overflow-auto">
-          <div className="max-w-6xl mx-auto space-y-6">
+    <AppLayout>
+      <div className="space-y-6">
             {/* Page Header */}
             <div className="flex items-center justify-between">
               <div>
@@ -758,10 +753,8 @@ const Backup = () => {
                 </div>
               </div>
             </div>
-          </div>
-        </main>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

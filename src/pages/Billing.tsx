@@ -1,6 +1,5 @@
 import { useState } from "react";
-import Sidebar from "@/components/dashboard/Sidebar";
-import Header from "@/components/dashboard/Header";
+import AppLayout from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -198,12 +197,8 @@ const Billing = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar />
-      <div className="flex-1 min-w-0 flex flex-col pl-16 md:pl-0">
-        <Header />
-        <main className="flex-1 p-3 sm:p-6 overflow-auto">
-          <div className="max-w-7xl mx-auto space-y-6">
+    <AppLayout>
+      <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
               <div>
@@ -478,9 +473,6 @@ const Billing = () => {
               </CardContent>
             </Card>
           </div>
-        </main>
-      </div>
-
       {/* View Invoice Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
         <DialogContent className="max-w-lg">
@@ -559,7 +551,7 @@ const Billing = () => {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </AppLayout>
   );
 };
 
