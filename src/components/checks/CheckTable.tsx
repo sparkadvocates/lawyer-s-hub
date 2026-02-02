@@ -25,11 +25,11 @@ const noticeStatusLabels: Record<NoticeStatus, string> = {
 };
 
 const noticeStatusColors: Record<NoticeStatus, string> = {
-  pending: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20',
-  ad_received: 'bg-green-500/10 text-green-600 border-green-500/20',
-  recipient_not_found: 'bg-red-500/10 text-red-600 border-red-500/20',
-  returned_unaccepted: 'bg-orange-500/10 text-orange-600 border-orange-500/20',
-  delivered: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
+  pending: 'bg-warning/10 text-warning border-warning/20',
+  ad_received: 'bg-success/10 text-success border-success/20',
+  recipient_not_found: 'bg-destructive/10 text-destructive border-destructive/20',
+  returned_unaccepted: 'bg-warning/10 text-warning border-warning/20',
+  delivered: 'bg-info/10 text-info border-info/20',
 };
 
 const formatDate = (dateStr: string | null) => {
@@ -44,7 +44,7 @@ const CheckTable = ({ checks, alerts, onEdit, onDelete, onView, highlightedCheck
 
   const getStatusIcon = (check: Check) => {
     if (check.case_filed_date) {
-      return <CheckCircle className="w-4 h-4 text-green-500" />;
+      return <CheckCircle className="w-4 h-4 text-success" />;
     }
     
     const checkAlerts = getCheckAlerts(check.id);
@@ -55,7 +55,7 @@ const CheckTable = ({ checks, alerts, onEdit, onDelete, onView, highlightedCheck
       return <AlertTriangle className="w-4 h-4 text-destructive" />;
     }
     if (hasWarning) {
-      return <Clock className="w-4 h-4 text-yellow-500" />;
+      return <Clock className="w-4 h-4 text-warning" />;
     }
     return null;
   };
@@ -72,7 +72,7 @@ const CheckTable = ({ checks, alerts, onEdit, onDelete, onView, highlightedCheck
   return (
     <TooltipProvider>
       <div className="overflow-x-auto">
-        <Table>
+        <Table className="min-w-[720px] sm:min-w-0">
           <TableHeader>
             <TableRow>
               <TableHead className="w-[40px]"></TableHead>
@@ -80,10 +80,10 @@ const CheckTable = ({ checks, alerts, onEdit, onDelete, onView, highlightedCheck
               <TableHead>ব্যাংক</TableHead>
               <TableHead>চেকের তারিখ</TableHead>
               <TableHead className="text-right">পরিমাণ</TableHead>
-              <TableHead>ডিস অনার</TableHead>
-              <TableHead>লিগ্যাল নোটিশ</TableHead>
+              <TableHead className="hidden md:table-cell">ডিস অনার</TableHead>
+              <TableHead className="hidden md:table-cell">লিগ্যাল নোটিশ</TableHead>
               <TableHead>নোটিশ অবস্থা</TableHead>
-              <TableHead>মামলা দায়ের</TableHead>
+              <TableHead className="hidden md:table-cell">মামলা দায়ের</TableHead>
               <TableHead className="text-right">অ্যাকশন</TableHead>
             </TableRow>
           </TableHeader>
@@ -100,8 +100,8 @@ const CheckTable = ({ checks, alerts, onEdit, onDelete, onView, highlightedCheck
                   <TableCell>
                     {checkAlerts.length > 0 && (
                       <Tooltip>
-                        <TooltipTrigger>
-                          {getStatusIcon(check)}
+                        <TooltipTrigger asChild>
+                          <span className="inline-flex">{getStatusIcon(check)}</span>
                         </TooltipTrigger>
                         <TooltipContent className="max-w-xs">
                           <ul className="space-y-1">
@@ -120,17 +120,17 @@ const CheckTable = ({ checks, alerts, onEdit, onDelete, onView, highlightedCheck
                   <TableCell className="text-right font-mono">
                     {check.check_amount ? `৳${check.check_amount.toLocaleString()}` : '-'}
                   </TableCell>
-                  <TableCell>{formatDate(check.dishonor_date)}</TableCell>
-                  <TableCell>{formatDate(check.legal_notice_date)}</TableCell>
+                  <TableCell className="hidden md:table-cell">{formatDate(check.dishonor_date)}</TableCell>
+                  <TableCell className="hidden md:table-cell">{formatDate(check.legal_notice_date)}</TableCell>
                   <TableCell>
                     <Badge className={noticeStatusColors[check.notice_status]}>
                       {noticeStatusLabels[check.notice_status]}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">
                     {check.case_filed_date ? (
-                      <span className="flex items-center gap-1 text-green-600">
-                        <CheckCircle className="w-3 h-3" />
+                      <span className="flex items-center gap-1 text-success">
+                        <CheckCircle className="w-3 h-3 text-success" />
                         {formatDate(check.case_filed_date)}
                       </span>
                     ) : '-'}
